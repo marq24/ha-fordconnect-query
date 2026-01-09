@@ -178,7 +178,7 @@
             "description": "Ruft eine manuelle Datenaktualisierung aus der FordPass-API auf. (Vorsicht: Häufige Aufrufe können zu einer temporären Drosselung/Sperre führen)"
         }
     },
-    "title": "FordPass",
+    "title": "FordConnect Query",
 
     "entity": {
         "button": {

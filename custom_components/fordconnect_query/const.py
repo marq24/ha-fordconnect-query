@@ -4,9 +4,7 @@ from typing import Final
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN: Final = "fordconnect-query"
-CALLBACK_URL: Final = "/fordconnect-eu-cb"
-CALLBACK_NAME: Final = "fordconnect-eu-cb" # the name should not really matter...
+DOMAIN: Final = "fordconnect_query"
 STATE_LOOKUP_MAP = "secure_state-to-flow_id-map"
 
 FORD_AUTHORIZE_URL: Final = "https://api.vehicle.ford.com/fcon-public/v1/auth/init"

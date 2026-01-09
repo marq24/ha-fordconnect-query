@@ -58,7 +58,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {"manifest_version": intg_version})
 
 
-
     # continue with startup...
     vin = config_entry.data[CONF_VIN]
     for config_entry_data in config_entry.data:

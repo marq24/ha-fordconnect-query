@@ -179,7 +179,7 @@
             "description": "Manually poll API for data update (Warning: doing this too often could result in a ban)"
         }
     },
-    "title": "FordPass",
+    "title": "FordConnect Query",
 
     "entity": {
         "button": {

@@ -3,9 +3,9 @@ import secrets
 
 from yarl import URL
 
+import homeassistant.helpers.config_entry_oauth2_flow as oauth2_flow
 from custom_components.fordconnect_query.const import (
     DOMAIN,
-    CALLBACK_URL,
     STATE_LOOKUP_MAP,
     FORD_AUTHORIZE_URL,
     FORD_TOKEN_URL
@@ -15,41 +15,36 @@ from homeassistant.components.application_credentials import (
     AuthImplementation,
     ClientCredential,
 )
-from homeassistant.components.http import current_request
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.config_entry_oauth2_flow import LocalOAuth2Implementation
+from homeassistant.helpers.config_entry_oauth2_flow import (
+    LocalOAuth2Implementation,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 class FordConQOAuth2Implementation(LocalOAuth2Implementation):
 
-    @property
-    def redirect_uri(self) -> str:
-        # since when the user just uses a hostname or just localhost, we must
-        # use this for the redirect!
-        if (req := current_request.get()) is not None:
-            protocol = "https" if req.secure else "http"
-            host = req.host
-            return f"{protocol}://{host}{CALLBACK_URL}"
-
-        # just as fallback...
-        from homeassistant.helpers.network import get_url
-        return f"{get_url(self.hass)}{CALLBACK_URL}"
-
     async def async_generate_authorize_url(self, flow_id: str) -> str:
+        """Generate a short state for Ford and the redirect service."""
+        # Generate a 16-character hex string (8 bytes) to meet the 16-byte limit
+        secure_state = secrets.token_hex(8)
 
-        secure_state = secrets.token_urlsafe(16)
-        # storing our flow_id in a dict to be able to retrieve it later...
+        # We must manually register the state with Home Assistant's OAuth2 flow manager
+        # This is how HA knows which flow_id to resume when the callback happens.
+
+        # The standard way HA handles this is via a signed JWT, but since we have
+        # a strict 16-byte limit, we use a simple lookup map in hass.data
         self.hass.data.setdefault(DOMAIN, {}).setdefault(STATE_LOOKUP_MAP, {})[secure_state] = flow_id
 
         params = {
             "response_type": "code",
             "client_id": self.client_id,
             "redirect_uri": self.redirect_uri,
-            "state": secure_state
+            "state": secure_state,
+            #"scope": "openid offline_access" # Adjust scopes as needed for Ford
         }
         url_str = str(URL(self.authorize_url).with_query(params))
-        _LOGGER.debug(f"async_generate_authorize_url(): create final URL: {url_str}")
+        _LOGGER.info(f"async_generate_authorize_url(): create final URL {url_str}")
         return url_str
 
     async def async_resolve_external_data(self, external_data: dict) -> dict:
@@ -66,6 +61,23 @@ class FordConQOAuth2Implementation(LocalOAuth2Implementation):
         else:
             _LOGGER.error(f"async_resolve_external_data(): No token data received from oAuth provider for {external_data}")
             return None
+
+# To make the standard /auth/external/callback work with our short state,
+# we wrap the decoder.
+_ORIGINAL_DECODE = oauth2_flow._decode_jwt
+
+def _patched_decode_jwt(hass, state_str):
+    # If the state exists in our Ford lookup map, return a fake JWT-like dict
+    if flow_id := hass.data.get(DOMAIN, {}).get(STATE_LOOKUP_MAP, {}).get(state_str):
+        _LOGGER.info(f"_patched_decode_jwt(): found flow_id for state {state_str}: {flow_id}")
+        return {"flow_id": flow_id}
+
+    # Otherwise, fall back to the original HA logic
+    return _ORIGINAL_DECODE(hass, state_str)
+
+# Apply the patch
+oauth2_flow._decode_jwt = _patched_decode_jwt
+
 
 async def async_get_authorization_server(hass: HomeAssistant) -> AuthorizationServer:
     return AuthorizationServer(

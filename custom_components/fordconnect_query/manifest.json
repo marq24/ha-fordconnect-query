@@ -1,5 +1,5 @@
 {
-  "domain": "fordconnect-query",
+  "domain": "fordconnect_query",
   "name": "FordConnect Query (for EU)",
   "codeowners": ["@marq24"],
   "config_flow": true,
