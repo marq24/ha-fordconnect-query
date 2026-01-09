@@ -3,7 +3,7 @@
   "name": "FordConnect Query (for EU)",
   "codeowners": ["@marq24"],
   "config_flow": true,
-  "dependencies": ["application_credentials"],
+  "dependencies": ["application_credentials", "http"],
   "documentation": "https://github.com/marq24/ha-fordconnect-query",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/marq24/ha-fordconnect-query/issues",
