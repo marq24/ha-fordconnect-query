@@ -54,9 +54,14 @@
 > 3. You need to configure oAuth Application Credentials in HA that can be used by this integration. (will be done automatically via the integration setup)
 ---
 
+## Sample panel
+![
+https://raw.githubusercontent.com/marq24/ha-fordconnect-query/refs/heads/main/docs/sample-panel.png](
+https://raw.githubusercontent.com/marq24/ha-fordconnect-query/refs/heads/main/docs/sample-panel.png)
+
 ## Requirements
-1. Your car must have the latest onboard modem functionality and have been registered/authorized with the FordPass™/The Lincoln Way™ application.<br/><br/>
-2. You need a Home Assistant instance (v2025.11 or higher) with the [HACS](https://hacs.xyz/docs/use/#getting-started-with-hacs) custom integration installed.<br/><br/>
+1. Your car must have the latest onboard modem functionality and have been registered/authorized with the FordPass™/The Lincoln Way™ application.<br/>
+2. You need a Home Assistant instance (v2025.11 or higher) with the [HACS](https://hacs.xyz/docs/use/#getting-started-with-hacs) custom integration installed.<br/>
 3. [You __must have registered an application with Ford__](./docs/REGISTER_APPLICATION.md).
 
 > [!IMPORTANT]
