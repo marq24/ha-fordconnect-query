@@ -1,0 +1,332 @@
+{
+    "selector": {
+        "region": {
+            "options": {
+                "aaa": "------ FORD Vehicles ------",
+                "deu": "Germany",
+                "fra": "France",
+                "nld": "Netherlands",
+                "ita": "Italy",
+                "esp": "Spain",
+                "nor": "Norway",
+                "gbr": "United Kingdom of Great Britain and Northern Ireland",
+                "aus": "Australia [requires an 'ford.com.au/ford.co.nz' Account]",
+                "nzl": "New Zealand [requires an 'ford.co.nz/ford.com.au' Account]",
+                "zaf": "South Africa [requires an 'ford.co.za' Account]",
+                "can": "Canada",
+                "mex": "Mexico",
+                "usa": "The United States of America",
+                "bra": "Brazil [requires an 'ford.com.br/ford.com.ar' Account]",
+                "arg": "Argentina [requires an 'ford.com.ar/ford.com.br' Account]",
+                "rest_of_europe": "Other European Countries",
+                "rest_of_world": "Rest of the World",
+                "zzz": "------ LINCOLN Vehicles ------",
+                "lincoln_usa": "United States of America"
+            }
+        },
+        "setup_type": {
+            "options": {
+                "new_account": "Add a new FordPass™/The Lincoln Way™ account or configure a new region",
+                "add_vehicle": "Add a vehicle from an existing FordPass™/The Lincoln Way™ account/region"
+            }
+        },
+        "brand": {
+            "options": {
+                "ford": "Ford Vehicles - FordPass™ App",
+                "lincoln": "Lincoln Vehicles - The Lincoln Way™ App"
+            }
+        }
+    },
+    "config": {
+        "abort": {
+            "already_configured": "Account is already configured",
+            "no_vehicles": "No vehicles on account or all are configured already",
+            "reauth_successful": "Re-Authorization was completed",
+            "reauth_reload_failed": "Re-Authorization was completed\n\nBut the integration could not be reloaded. Please restart Home Assistant to complete the re-Authorization process or check your log for further details",
+            "reauth_unsuccessful": "Re-Authorization FAILED\n\nPlease check the token and try again",
+            "reauth_not_possible": "No valid region found\n\nUnfortunately you must reconfigure the integration",
+            "no_filesystem_access": "This integration requires access to the local file system of your HomeAssistant installation to store a key for your FordPass™/The Lincoln Way™ account.\n\nTo do this, a subfolder will be created in the '.storage/' folder. However, this is currently not possible. An internal test failed. You can find details in the log of your Home Assistant instance.\n\nPlease ensure that you are running the Home Assistant installation with the correct user who has write access to the local file system.\n\nIf you are running Home Assistant in a Docker container, ensure that you are running the container with the correct user and that the container has access to the local file system.\n\nPlease check your installation and restart the setup of this integration once access to the local file system is possible.",
+            "no_brand": "No Brand (Ford or Lincoln) could be detected"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid Credentials",
+            "invalid_vin": "Vin not found for given account",
+            "invalid_mobile": "Mobile number as username must be specified if using South African Region",
+            "invalid_token": "Token is invalid, please check you copied the correct token from the Header Location, it should start with fordapp:// (or lincolnapp://)",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "title": "Add new FordPass™/The Lincoln Way™ account or vehicle",
+                "description": "Since you have already configured at least one FordPass™/The Lincoln Way™ account, you must first select whether you want to add another vehicle or a new account (or region).\n-- --\n### Important information concerning Multi-Vehicle Support\n\nWhen you have __multiple__ vehicles registered in your FordPass™/The Lincoln Way™ account, then in the FordPass™/The Lincoln Way™ App you must first select the vehicle you want to use, before you can access any data or functionality of this vehicle. __The same limitation is also true__ for this Home Assistant integration.\n\nThe main reason for this restriction is the fact, that the FordPass™ App and this integration makes use of a websocket connection to the Ford backend, which is some sort of bound to a single vehicle at a time.\n\nYou will find all details here: https://github.com/marq24/ha-fordpass?tab=readme-ov-file#multi-vehicle-support",
+                "data": {
+                    "setup_type": "What do you want to do?"
+                },
+                "data_description": {
+                    "setup_type": "If you set up a second vehicle with the same account, only one of the two may be active in HA at any one time - otherwise the access tokens will overwrite each other"
+                }
+            },
+            "select_account": {
+                "title": "Select your FordPass™/The Lincoln Way™-Account",
+                "description": "Please select the FordPass™/The Lincoln Way™ account from which you want to add another vehicle.",
+                "data": {
+                    "account": "FordPass™/The Lincoln Way™ account"
+                },
+                "data_description": {
+                    "account": "If you set up a second vehicle with the same account, only one of the two may be active in HA at any one time - otherwise the access tokens will overwrite each other"
+                }
+            },
+            "token": {
+                "title": "Setup Token",
+                "description": "The Token setup requires an external browser to get finally the access token.\r\rDetails can be found https://github.com/marq24/ha-fordpass/blob/main/doc/OBTAINING_TOKEN.md\r\rPlease follow the steps:\r1. Copy the URL below\r2. Open a Browser (with enabled developer tools) and paste the copied URL into your second browser\r3. Enter your FordPass™/The Lincoln Way™ credentials (again) and press the login button\r4. Watch the Network-tab till you see the `?code=` request\r5. Copy the full `Request-URL` from this request from the browsers developer tools and paste it in the Token field below\r6. Click OK to continue",
+                "data": {
+                    "url": "URL: copy this into your browser",
+                    "tokenstr": "Token Request-URL: after the login process is completed in the browser, paste the full `Request-URL`"
+                }
+            },
+            "reauth_confirm": {
+                "title": "Re-Authorization required",
+                "description": "Your previous token is invalid - so you must provide a new one for your account {username}:\r\rThe Token setup requires an external browser to get finally the access token.\r\rDetails can be found https://github.com/marq24/ha-fordpass/blob/main/doc/OBTAINING_TOKEN.md\r\rPlease follow the steps:\r1. Copy the URL below\r2. Open a Browser (with enabled developer tools) and paste the copied URL into your second browser\r3. Enter your FordPass™/The Lincoln Way™ credentials (again) and press the login button (don't get fooled by the spinner will spin forever - this is 'normal')\r4. Watch the Network-tab till you see the `?code=` request\r5. Copy the full `Request-URL` from this request from the browsers developer tools and paste it in the Token field below\r6. Click OK to continue",
+                "data": {
+                    "url": "URL: copy this into your browser",
+                    "tokenstr": "Token Request-URL: after the login process is completed in the browser, paste the full `Request-URL`"
+                }
+            },
+            "brand": {
+                "data": {
+                    "brand": "Select your Brand"
+                }
+            },
+            "new_account_ford": {
+                "data": {
+                    "password": "FordPass™ Password",
+                    "username": "FordPass™ Username (Email)",
+                    "region" : "FordPass™ Region"
+                },
+                "data_description": {
+                    "username": "If using a mobile instead of email please enter your number (minus initial 0) also include + and the country code (e.g. +99123456789)",
+                    "region": "The region you are going to select must match the region for which you have registered your FordPass™ account. Further details at GitHub"
+                }
+            },
+            "new_account_lincoln": {
+            "data": {
+              "password": "The Lincoln Way™ Password",
+              "username": "The Lincoln Way™ Username (Email)",
+              "region" : "The Lincoln Way™ Region"
+            },
+            "data_description": {
+              "username": "If using a mobile instead of email please enter your number (minus initial 0) also include + and the country code (e.g. +99123456789)",
+              "region": "The region you are going to select must match the region for which you have registered your The Lincoln Way™ account. Further details at GitHub"
+            }
+          },
+            "vehicle": {
+                "title": "Select vehicle to add",
+                "description": "Only vehicles not currently added will be shown",
+                "data": {
+                    "vin": "VIN"
+                }
+            },
+            "vin": {
+                "title": "Manual Vin Entry",
+                "description": "Please enter your VIN number manually as no vehicles could be found automatically.",
+                "data": {
+                    "vin": "Vin Number for vehicle"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "pressure_unit": "Unit of Pressure",
+                    "distance_unit": "Unit of Distance",
+                    "distance_conversion": "Disable distance conversion",
+                    "update_interval": "Interval to poll FordPass API (Seconds)",
+                    "force_remote_climate_control": "The remote climate (❄|☀) control options should always be available",
+                    "log_to_filesystem": "Log API responses to local HA filesystem"
+                },
+                "data_description": {
+                    "force_remote_climate_control": "If you activate this option, the setting specified by Ford will be ignored.",
+                    "log_to_filesystem": "This option should not be activated over a longer period of time!\rFiles can be found: './storage/fordpass/data_dumps'"
+                },
+                "description": "Configure fordpass options"
+            }
+        }
+    },
+    "services": {
+        "refresh_status": {
+            "name": "Refresh Vehicle Status",
+            "description": "Poll car for latest status (Takes up to 5mins to update once this function has been run!)",
+            "fields": {
+                "vin": {
+                    "name": "VIN",
+                    "description": "Enter a vin number to only refresh the specified vehicle (Default refreshes all added vehicles)"
+                }
+            }
+        },
+        "clear_tokens": {
+            "name": "Clear Tokens",
+            "description": "Clear the stored token cache (requires an re-authentication afterwards)"
+        },
+        "reload": {
+            "name": "Reload",
+            "description": "Reload the FordPass Integration"
+        },
+        "poll_api": {
+            "name": "Poll API",
+            "description": "Manually poll API for data update (Warning: doing this too often could result in a ban)"
+        }
+    },
+    "title": "FordPass",
+
+    "entity": {
+        "button": {
+            "update_data":      {"name": "Local Sync"},
+            "request_refresh":  {"name": "Remote Sync"},
+            "doorlock":         {"name": "Lock"},
+            "doorunlock":       {"name": "Unlock"},
+            "evstart":          {"name": "EV Charging start"},
+            "evcancel":         {"name": "EV Charging resume"},
+            "evpause":          {"name": "EV Charging pause"},
+            "hafshort":         {"name": "Honk & Flash [1 sec.]"},
+            "hafdefault":       {"name": "Honk & Flash [3 sec.]"},
+            "haflong":          {"name": "Honk & Flash [5 sec.]"},
+            "extendremotestart":{"name": "RC (❄|☀): Extend Time"},
+            "msgdeleteall":     {"name": "Messages: Delete All"},
+            "msgdeletelast":    {"name": "Messages: Delete Last"}
+        },
+        "device_tracker":   {"tracker": {"name": "Vehicle Tracker"}},
+        "lock":             {"doorlock":{"name": "Doors"}},
+        "switch": {
+            "ignition":                 {"name": "RC (❄|☀): Start [RemoteControl]"},
+            "elvehcharge":              {"name": "EV Charging (Pause)"},
+            "guardmode":                {"name": "Guard Mode"},
+            "autosoftwareupdates":      {"name": "Automatic Software Updates"},
+            "rccdefrostrear":           {"name": "RC (❄|☀): Rear Defrost [RemoteControl]"},
+            "rccdefrostfront":          {"name": "RC (❄|☀): Heated Windshield [RemoteControl]"},
+            "rccsteeringwheel":         {"name": "RC (❄|☀): Steering Wheel Heating [RemoteControl]"}
+        },
+        "number": {
+            "rcctemperature":       {"name": "RC (❄|☀): Climate Temperature [RemoteControl]"},
+            "elvehtargetcharge":    {"name": "Target charge level"},
+            "globaltargetsoc":      {"name": "General: Target charge level"},
+            "globalaccurrentlimit": {"name": "AC Current Limit"},
+            "globaldcpowerlimit":   {"name": "DC Power Limit"}
+        },
+        "sensor": {
+            "odometer":                 {"name": "Odometer"},
+            "fuel":                     {"name": "Fuel"},
+            "battery":                  {"name": "Battery (12V)"},
+            "oil":                      {"name": "Oil Life"},
+            "tirepressure":             {"name": "Tire Pressure"},
+            "gps":                      {"name": "GPS JSON"},
+            "alarm":                    {"name": "Alarm Status"},
+            "ignitionstatus":           {"name": "Status Ignition"},
+            "doorstatus":               {"name": "Status Door"},
+            "windowposition":           {"name": "Window Position"},
+            "lastrefresh":              {"name": "last refresh"},
+            "elveh":                    {"name": "EV"},
+            "elvehplug":                {"name": "EV Plug"},
+            "elvehcharging":            {"name": "EV Charging"},
+            "speed":                    {"name": "Speed"},
+            "enginespeed":              {"name": "Revolution"},
+            "gearleverposition":        {"name": "Gear Lever Position"},
+            "indicators":               {"name": "Indicators"},
+            "coolanttemp":              {"name": "Temperature Coolant"},
+            "outsidetemp":              {"name": "Temperature Outdoors"},
+            "engineoiltemp":            {"name": "Temperature Engine Oil"},
+            "deepsleep":                {"name": "Sleep Mode"},
+            "firmwareupginprogress":    {"name": "Firmware Update In Progress"},
+            "remotestartstatus":        {"name": "RC (❄|☀): Status Remote Start"},
+            "zonelighting":             {"name": "Zone Lighting"},
+            "messages":                 {"name": "Messages"},
+            "dieselsystemstatus":       {"name": "Status Diesel System"},
+            "exhaustfluidlevel":        {"name": "AdBlue Level"},
+            "events":                   {"name": "Events"},
+            "metrics":                  {"name": "Metrics"},
+            "states":                   {"name": "States"},
+            "vehicles":                 {"name": "Vehicles"},
+
+            "soc":                      {"name": "State of Charge"},
+            "evccstatus":               {"name": "EVCC status code"},
+            "seatbelt":                 {"name": "Belt Status"},
+            "deviceconnectivity":       {"name": "Connectivity"},
+
+            "yawrate":                  {"name": "Yaw Rate"},
+            "acceleration":             {"name": "Acceleration"},
+            "brakepedalstatus":         {"name": "Status Brake Pedal"},
+            "braketorque":              {"name": "Brake Torque"},
+            "acceleratorpedalposition": {"name": "Accelerator Pedal Position"},
+            "parkingbrakestatus":       {"name": "Status Parking Brake"},
+            "torqueattransmission":     {"name": "Torque at Transmission"},
+            "wheeltorquestatus":        {"name": "Status Wheel Torque"},
+            "cabintemperature":         {"name": "Cabin Temperature"},
+            "lastenergyconsumed":       {"name": "EV Energy Consumption (last trip)"},
+            "energytransferlogentry":   {"name": "EV Last Charging Session"},
+            "remotestartcountdown":     {"name": "RC (❄|☀): Remaining Time"}
+        },
+        "select": {
+            "zonelighting": {
+                "name": "Zone Lighting",
+                "state": {
+                    "0": "ON",
+                    "1": "Front",
+                    "2": "Rear",
+                    "3": "Driver",
+                    "4": "Passenger",
+                    "off": "OFF"
+                }
+            },
+            "rcctemperature": {
+              "name": "RC (❄|☀): Temperatur [RemoteControl]",
+              "state": {"lo": "LOW",
+                        "16": "16.0°C", "16_5": "16.5°C", "17": "17.0°C", "17_5": "17.5°C", "18": "18.0°C", "18_5": "18.5°C", "19": "19.0°C", "19_5": "19.5°C", "20": "20.0°C", "20_5": "20.5°C",
+                        "21": "21.0°C", "21_5": "21.5°C", "22": "22.0°C", "22_5": "22.5°C", "23": "23.0°C", "23_5": "23.5°C", "24": "24.0°C", "24_5": "24.5°C", "25": "25.0°C", "25_5": "25.5°C",
+                        "26": "26.0°C", "26_5": "26.5°C", "27": "27.0°C", "27_5": "27.5°C", "28": "28.0°C", "28_5": "28.5°C", "29": "29.0°C", "29_5": "29.5°C", "30": "30.0°C",
+                        "hi": "HIGH"}
+            },
+            "rcctemperaturefahrenheit": {
+                "name": "RC (❄|☀): Temperatur [RemoteControl]",
+                "state": {"lo": "LOW",
+                          "16": "60.8°F", "16_5": "61.7°F", "17": "62.6°F", "17_5": "63.5°F", "18": "64.4°F", "18_5": "65.3°F", "19": "66.2°F", "19_5": "67.1°F", "20": "68.0°F", "20_5": "68.9°F",
+                          "21": "69.8°F", "21_5": "70.7°F", "22": "71.6°F", "22_5": "72.5°F", "23": "73.4°F", "23_5": "74.3°F", "24": "75.2°F", "24_5": "76.1°F", "25": "77.0°F", "25_5": "77.9°F",
+                          "26": "78.8°F", "26_5": "29.7°F", "27": "80.6°F", "27_5": "81.5°F", "28": "82.4°F", "28_5": "83.3°F", "29": "84.2°F", "29_5": "85.1°F", "30": "86.0°F",
+                          "hi": "HIGH"}
+            },
+            "rccseatrearleft": {
+                "name": "RC (❄|☀): Seat rear left [RemoteControl]",
+                "state": { "off": "Off", "cooled1": "Cooling I", "cooled2": "Cooling II", "cooled3": "Cooling III", "heated1": "Heating I", "heated2": "Heating II", "heated3": "Heating III"}
+            },
+            "rccseatrearright": {
+                "name": "RC (❄|☀): Seat rear right [RemoteControl]",
+                "state": { "off": "Off", "cooled1": "Cooling I", "cooled2": "Cooling II", "cooled3": "Cooling III", "heated1": "Heating I", "heated2": "Heating II", "heated3": "Heating III"}
+            },
+            "rccseatfrontleft": {
+                "name": "RC (❄|☀): Seat front left [RemoteControl]",
+                "state": { "off": "Off", "cooled1": "Cooling I", "cooled2": "Cooling II", "cooled3": "Cooling III", "heated1": "Heating I", "heated2": "Heating II", "heated3": "Heating III"}
+            },
+            "rccseatfrontright": {
+                "name": "RC (❄|☀): Seat front right [RemoteControl]",
+                "state": { "off": "Off", "cooled1": "Cooling I", "cooled2": "Cooling II", "cooled3": "Cooling III", "heated1": "Heating I", "heated2": "Heating II", "heated3": "Heating III"}
+            },
+            "elvehtargetcharge": {
+                "name": "Target charge level",
+                "state": { "50": "50%", "60": "60%", "70": "70%", "80": "80%", "85": "85%", "90": "90%", "95": "95%", "100": "100%"}
+            },
+            "elvehtargetchargealt1": {
+                "name": "Target charge level [alt location 1]",
+                "state": { "50": "50%", "60": "60%", "70": "70%", "80": "80%", "85": "85%", "90": "90%", "95": "95%", "100": "100%"}
+            },
+            "elvehtargetchargealt2": {
+                "name": "Target charge level [alt location 2]",
+                "state": { "50": "50%", "60": "60%", "70": "70%", "80": "80%", "85": "85%", "90": "90%", "95": "95%", "100": "100%"}
+            },
+            "globaltargetsoc": {
+                "name": "General: Target charge level",
+                "state": { "50": "50%", "60": "60%", "70": "70%", "80": "80%", "85": "85%", "90": "90%", "95": "95%", "100": "100%"}
+            }
+        }
+    }
+}

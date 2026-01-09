@@ -1,0 +1,7 @@
+{
+	"name": "fordconnect-query",
+	"content_in_root": false,
+    "homeassistant": "2025.10.0",
+    "hacs": "1.18.0",
+    "render_readme": true
+}
