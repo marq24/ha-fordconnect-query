@@ -59,6 +59,9 @@ CONFIG_SCHEMA = vol.Schema({DOMAIN: vol.Schema({})}, extra=vol.ALLOW_EXTRA)
 #PLATFORMS = ["button", "lock", "number", "sensor", "switch", "select", "device_tracker"]
 PLATFORMS = ["sensor", "device_tracker"]
 
+DATA_STORAGE_KEY = "temp_data_storage"
+TIME_KEY = "time"
+DATA_KEY = "data"
 
 async def async_setup(hass: HomeAssistant, config: dict):
     #hass.data.setdefault(DOMAIN, {})
@@ -91,6 +94,14 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
             raise ConfigEntryNotReady(translation_domain=DOMAIN, translation_key="oauth2_implementation_unavailable") from err
     session = OAuth2Session(hass, config_entry, implementation)
     coordinator = FordConQDataCoordinator(hass, session, config_entry, update_interval_as_int=update_interval_as_int)
+
+    # check if we can/must restore the last update time...
+    temp_data_store = hass.data.setdefault(DOMAIN, {}).setdefault(DATA_STORAGE_KEY, {})
+    if vin in temp_data_store:
+        _LOGGER.debug(f"[@{vin}] Restoring data & last_update_time from temp data store...")
+        coordinator._last_update_time = temp_data_store[vin][TIME_KEY]
+        coordinator.data = temp_data_store[vin][DATA_KEY]
+        temp_data_store.pop(vin)
 
     # init our coordinator...
     await coordinator.async_refresh()
@@ -156,6 +167,11 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     if unload_ok:
         if DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]:
             coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR_KEY]
+            # storing our last update time...
+            hass.data.setdefault(DOMAIN, {}).setdefault(DATA_STORAGE_KEY, {})[coordinator._vin] = {
+                TIME_KEY: coordinator._last_update_time,
+                DATA_KEY: coordinator.data
+            }
             await coordinator.clear_data()
             hass.data[DOMAIN].pop(config_entry.entry_id)
 
