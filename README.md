@@ -115,20 +115,10 @@ If accepting the invitation doesn't work or results in a blank screen in the For
 
 ## Multi-Vehicle Support
 
-TBD
+This integration supports multiple vehicles for in your FordPass™ account.
 
-<!--
-When you have __multiple__ vehicles registered in your FordPass™/The Lincoln Way™ account, then in the FordPass™/The Lincoln Way™ App you must first select the vehicle you want to use, before you can access any data or functionality of this vehicle. __The same limitation is also true__ for this Home Assistant integration.
+When you have registered multiple vehicles in your FordPass™ account, then you can add the integration multiple times. Make sure, when you select the vehicle you want to use from the list of available vehicles at the _consent_ page from Ford (details can be found [in the short integration configuration tutorial](./docs/CONFIGURE_INTEGRATION.md)).
 
-The main reason for this restriction is the fact that the FordPass™ App and this integration make use of a websocket connection to the Ford backend, which is some sort of bound to a single vehicle at a time.
-
-So you have three options to use multiple vehicles in Home Assistant with this integration:
-1. **Use multiple FordPass™ accounts**: You can create a separate FordPass™ account for each of your vehicles and then add each account as a separate integration in Home Assistant. This way you can use multiple vehicles in Home Assistant that do not have any influence on each other [my personal recommendation].
-
-2. **Use different Regions**: If you have multiple vehicles, you can create for each of the vehicles a separate Region (and create a new access token per Region).
-
-3. **Have _only one_ vehicle _active_ in Home Assistant**: If you have multiple vehicles in your FordPass™ account, you can activate only use one of the vehicles at a time in Home Assistant. This means that you must first deactivate the current active vehicle in HA (deactivate the device) and then activate the new vehicle you want to use. This approach is quite similar to the way how FordPass™ App deals with multiple vehicles in your FordPass™ account, but probably that's not what you want.
--->
 
 <!--
 ## Services
@@ -209,6 +199,7 @@ Based on these attributes, you can create your own template sensors or automatio
 
 | Type                | Sensor Name                                         | Petrol/Diesel | (P)HEV/BEV |
 |:--------------------|:----------------------------------------------------|:-------------:|:----------:|
+<!--
 | Button              | Remote Sync (Car with Ford backend)                 | ✔             | ✔          |
 | Button              | Local Sync (Ford backend with HA)                   | ✔             | ✔          |
 | Lock                | Lock/Unlock Vehicle[^1]                             | ✔             | ✔          |
@@ -216,7 +207,9 @@ Based on these attributes, you can create your own template sensors or automatio
 | Button              | Start charging[^4]                                  |               | ✔          |
 | Switch              | PAUSE/UNPAUSE charging[^5]                          |               | ✔          |
 | Switch              | Auto SoftwareUpdates[^1]                            | ✔             | ✔          |
+-->
 | DeviceTracker       | Vehicle Tracker[^1]                                 | ✔             | ✔          |
+<!--
 | Select              | Zone Lighting (experimental)[^1]                    | ✔             | ✔          |
 | Switch              | RC: Start (❄/☀)[^1][^2]                             | ✔             | ✔          |
 | Button              | RC: Extend Time[^1][^2]                             | ✔             | ✔          |
@@ -226,6 +219,7 @@ Based on these attributes, you can create your own template sensors or automatio
 | Switch              | RC: Rear Defrost[^1][^2]                            | ✔             | ✔          |
 | Switch              | RC: Windshield Heating[^1][^2]                      | ✔             | ✔          |
 | Select              | Target charge level(s)[^6]                          |               | ✔          |
+-->
 
 [^1]: Must be supported by the vehicle. If not supported, the entity will not be available in the UI.
 [^2]: _RC_ stands for 'Remote Control'.
