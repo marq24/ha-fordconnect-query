@@ -55,7 +55,7 @@ Wenn Du diese Integration nützlich findest, dann bitte denk doch bitte darüber
 > Please be aware that I am developing this integration to the best of my knowledge and belief, but can't give a guarantee. Therefore, use this integration **at your own risk**! [ _I am not affiliated with Ford in any way._]
 >
 > ## FordPass™/The Lincoln Way™ Account Disclaimer 
-> **The use of this HA integration could lead to a (temporary) lock of your FordPass™/The Lincoln Way™ account.** (this is quite unlikely – since this integration is fully compliant with the required oAuth procedures by Ford) but since Ford does not officially support this integration, using it could result in your being locked out from your account.
+> **The use of this HA integration could lead to a (temporary) lock of your FordPass™/The Lincoln Way™ account.** (this is quite unlikely — since this integration is fully compliant with the required OAuth procedures by Ford) but since Ford does not officially support this integration, using it could result in your being locked out from your account.
 >
 > **It's recommended** to use/create a **separate FordPass™/The Lincoln Way™ account** for this integration ([see the 'step-by-step' procedure further below](https://github.com/marq24/ha-fordconnect-query?tab=readme-ov-file#use-of-a-separate-fordpassthe-lincoln-way-account-is-recommended)).
 
@@ -69,9 +69,9 @@ Wenn Du diese Integration nützlich findest, dann bitte denk doch bitte darüber
 ---
 
 > [!NOTE]
-> My main motivation comes from the fact that I have developed the fordpass Integration, and it's totally unknown how long this is continued to work.
+> My main motivation comes from the fact that I have developed the [FordPass Integration](https://github.com/marq24/ha-fordpass), and it's totally unknown how long this is continued to work.
 > 
-> YES I am aware that the FordConnect Query Integration has __ONLY READ__ capebilites. But that's IMHO way better to be able to get to the vehicle sensor data (when the fordpass Integration will stop working).
+> YES I am aware that the FordConnect Query Integration has __ONLY READ__ capabilities. But that's IMHO way better to be able to get to the vehicle sensor data (when the FordPass Integration will stop working).
 > 
 ---
 
@@ -79,7 +79,7 @@ Wenn Du diese Integration nützlich findest, dann bitte denk doch bitte darüber
 > ## OAuth Integration Setup 
 > 1. You need to register a Ford developer account to be able to use this integration.
 > 2. You need to register a Ford application in the __EU__ developer portal. 
-> 3. You need to configure oAuth Application Credentials in HA that can be used by this integration. (will be done automatically via the integration setup)
+> 3. You need to configure OAuth Application Credentials in HA that can be used by this integration. (will be done automatically via the integration setup)
 ---
 
 ## Sample panel
@@ -104,12 +104,12 @@ https://raw.githubusercontent.com/marq24/ha-fordconnect-query/refs/heads/main/do
 [![Open your Home Assistant instance and adding repository to HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marq24&repository=ha-fordconnect-query&category=integration)
 
 1. In HA HACS, you need to add a new custom repository (via the 'three dots' menu in the top right corner).
-2. Enter https://github.com/marq24/ha-fordconnect-query as the repository URL (and select  the type `Integration`).
+2. Enter `https://github.com/marq24/ha-fordconnect-query` as the _Repository URL_ and select the _Type_ `Integration`.
 3. After adding the new repository, you can search for `fordconnect` in the search bar.
 4. Install the 'correct' (aka 'this') FordConnect Query integration (v2026.1.0 or higher).
 6. Restart HA.
 
-### Step 2. Setup the Integration
+### Step 2. Set up the Integration
 
 [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=fordconnect_query)
 

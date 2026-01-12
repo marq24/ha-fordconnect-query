@@ -41,10 +41,10 @@ If you have __multiple vehicles__ registered with your Ford account, then in thi
 
 #### When you receive the following error message after pressing the _Consent_ button... 
 ![img007.png](img007.png)<br/>
-This means, then the global deployment of your registered application did not complete yet (when you created it in the Ford developer portal, there was a message that this might take up to 2h to complete – so please be patient). And try the configur the FordConnect Query Integraton in HA later.
+This means, then the global deployment of your registered application did not complete yet (when you created it in the Ford developer portal, there was a message that this might take up to 2h to complete – so please be patient). And try the configuration of the FordConnect Query Integration in HA later.
 
 #### When your app is successfully configured &amp; registered with Ford, then...
-The your browser session will be redirected to the https://my.home-assistant.io website and going to display a screen like this one here:<br/>
+your browser session will be redirected to the https://my.home-assistant.io website and going to display a screen like this one here:<br/>
 ![img008.png](img008.png)<br/>
 You should check if the currently configured HA Instance URL is the one you are currently using (is the URL from which you initially started the configuration of the vehicle). Again look at the area marked with the purple box (here in this example I am running my test/integration HA on `http://localhost:8123`).
 
@@ -52,6 +52,6 @@ If this URL is not correct, then press the _pencil_ icon and specify the correct
 
 Complete this step by pressing the blue _Link account_ button.
 
-Now you will return to your HA instance, and the integration now can use the authorisation `code` in order to request the final access token to access the vehcile data for your car.
+Now you will return to your HA instance, and the integration now can use the authorisation `code` in order to request the final access token to access the vehicle data for your car.
 
-When the process does not complete on your home assistant instance, then please [enable the debug log of the integration as documented here](https://github.com/marq24/ha-fordconnect-query?tab=readme-ov-file#want-to-report-an-issue) and start with configuration of the integration again, after you have restarted your HA instance. Now the integration will log each step of the process, and when you going to create an [issue](https://github.com/marq24/ha-fordconnect-query/issues), then you can attach the log file (or send it to me via email). TIA
+When the process does not complete on your home assistant instance, then please [enable the debug log of the integration as documented here](https://github.com/marq24/ha-fordconnect-query?tab=readme-ov-file#want-to-report-an-issue) and start with configuration of the integration again, after you have restarted your HA instance. Now the integration will log each step of the process, and when you're going to create an [issue](https://github.com/marq24/ha-fordconnect-query/issues), then you can attach the log file (or send it to me via email). TIA
