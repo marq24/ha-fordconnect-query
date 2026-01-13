@@ -98,7 +98,7 @@ https://raw.githubusercontent.com/marq24/ha-fordconnect-query/refs/heads/main/do
 >
 > Even __if__ your HA instance might be reachable from the public internet, you still __must__ use my.home-assistant.io as an intermediary system for the OAuth2 process, therefore, you __must__ use the documented URL (`https://my.home-assistant.io/redirect/oauth`) when register your application with Ford development portal.
 >
-> __Please don't think too complicated:__ Use your local address of your HA instance when setting up this integration.
+> __Please don't think too complicated:__ Use your __local http address__ of your HA instance when setting up this integration.
 
 
 ## Installation Instructions

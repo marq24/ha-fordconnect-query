@@ -17,7 +17,7 @@
 
    <br/>When you e.g., want to use additioallly the URL `http://localhost:8123/auth/external/callback`, then use `https://my.home-assistant.io/redirect/oauth, http://localhost:8123/auth/external/callback` as input.
 
-   <br/>When your HA instance is reachable via the public internet, then __do not it its external URL here, you must always include my.home-assistant.io__. Please be so kind and [read the additional information from the main readme.md](../README.md#additional-information-about-application-registration-at-ford-and-your-local-ha-instance)<br/><br/>
+   <br/>When your HA instance is reachable via the public internet, then __do not it its external URL here, you must always include my.home-assistant.io__. Please be so kind and [read the additional information from the main readme.md](../README.md#user-content-additional-information-about-application-registration-at-ford-and-your-local-ha-instance)<br/><br/>
 
 8. Press _Continue_<br/>
     <table><tr><td><img src="img003.png" width="375" /></td></tr></table><br/>
