@@ -1,7 +1,6 @@
 # FordConnect Query Home Assistant Integration 2026 (EV/PHEV/Petrol/Diesel)
 ## Supporting all Ford vehicles with FordPass™ connectivity
 <!--
-
 ## Welcome to the FordConnect Query Integration
 This is an alternative [integration to FordPass](https://github.com/marq24/ha-fordpass), making use of the FordConnect Query API. This API provides __read-only__ access to the vehicle data.
 ### Requirements
@@ -55,10 +54,7 @@ Wenn Du diese Integration nützlich findest, dann bitte denk doch bitte darüber
 > Please be aware that I am developing this integration to the best of my knowledge and belief, but can't give a guarantee. Therefore, use this integration **at your own risk**! [ _I am not affiliated with Ford in any way._]
 >
 > ## FordPass™/The Lincoln Way™ Account Disclaimer 
-> **The use of this HA integration could lead to a (temporary) lock of your FordPass™/The Lincoln Way™ account.** (this is quite unlikely — since this integration is fully compliant with the required OAuth procedures by Ford) but since Ford does not officially support this integration, using it could result in your being locked out from your account.
->
-> **It's recommended** to use/create a **separate FordPass™/The Lincoln Way™ account** for this integration ([see the 'step-by-step' procedure further below](https://github.com/marq24/ha-fordconnect-query?tab=readme-ov-file#use-of-a-separate-fordpassthe-lincoln-way-account-is-recommended)).
-
+> This integration is **fully compliant with the required OAuth procedures** described by Ford. But this integration is not officially supported by Ford. Therefore, **it is recommended** to use/create a **separate FordPass™/The Lincoln Way™ account** for this integration ([see the 'step-by-step' procedure further below](https://github.com/marq24/ha-fordconnect-query?tab=readme-ov-file#use-of-a-separate-fordpassthe-lincoln-way-account-is-recommended)).
 ---
 
 > [!NOTE]
