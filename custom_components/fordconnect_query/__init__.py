@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Final
 
 import voluptuous as vol
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfPressure, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
@@ -24,8 +25,7 @@ from homeassistant.helpers.typing import UNDEFINED, UndefinedType
 from homeassistant.helpers.update_coordinator import UpdateFailed, DataUpdateCoordinator, CoordinatorEntity
 from homeassistant.loader import async_get_integration
 from homeassistant.util.unit_system import UnitSystem
-
-from custom_components.fordconnect_query.const import (
+from .const import (
     DOMAIN,
     CONF_VIN,
     FORD_TELEMETRY_TEMP,
@@ -34,7 +34,7 @@ from custom_components.fordconnect_query.const import (
     DEFAULT_SCAN_INTERVAL,
     CONF_GARAGE_DATA, FORD_FCON_QUERY_BASE_URL
 )
-from custom_components.fordconnect_query.const_shared import (
+from .const_shared import (
     CONF_PRESSURE_UNIT,
     MANUFACTURER_FORD,
     MANUFACTURER_LINCOLN,
@@ -44,8 +44,8 @@ from custom_components.fordconnect_query.const_shared import (
     STARTUP_MESSAGE,
     DEFAULT_PRESSURE_UNIT, CONF_LOG_TO_FILESYSTEM,
 )
-from custom_components.fordconnect_query.const_tags import Tag, FUEL_OR_PEV_ONLY_TAGS, EV_ONLY_TAGS, RCC_TAGS
-from custom_components.fordconnect_query.fordpass_handler import (
+from .const_tags import Tag, FUEL_OR_PEV_ONLY_TAGS, EV_ONLY_TAGS, RCC_TAGS
+from .fordpass_handler import (
     UNSUPPORTED,
     ROOT_METRICS,
     ROOT_MESSAGES,

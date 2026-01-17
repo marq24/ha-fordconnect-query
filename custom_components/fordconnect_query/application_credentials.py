@@ -2,8 +2,10 @@ import logging
 import secrets
 from typing import Final
 
-import homeassistant.helpers.config_entry_oauth2_flow as oauth2_flow
 from aiohttp import ClientError
+from yarl import URL
+
+import homeassistant.helpers.config_entry_oauth2_flow as oauth2_flow
 from homeassistant.components.application_credentials import (
     AuthorizationServer,
     AuthImplementation,
@@ -13,9 +15,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.config_entry_oauth2_flow import (
     LocalOAuth2Implementation,
 )
-from yarl import URL
-
-from custom_components.fordconnect_query.const import (
+from .const import (
     DOMAIN,
     FORD_AUTHORIZE_URL,
     FORD_TOKEN_URL

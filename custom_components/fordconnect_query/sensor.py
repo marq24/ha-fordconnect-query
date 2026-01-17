@@ -10,12 +10,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_platform
 from homeassistant.helpers.restore_state import RestoreEntity, async_get, StoredState
-
-from custom_components.fordconnect_query import FordPassEntity, FordConQDataCoordinator, ROOT_METRICS
-from custom_components.fordconnect_query.const import DOMAIN
-from custom_components.fordconnect_query.const_shared import COORDINATOR_KEY
-from custom_components.fordconnect_query.const_tags import SENSORS, ExtSensorEntityDescription, Tag
-from custom_components.fordconnect_query.fordpass_handler import UNSUPPORTED
+from . import FordPassEntity, FordConQDataCoordinator, ROOT_METRICS
+from .const import DOMAIN
+from .const_shared import COORDINATOR_KEY
+from .const_tags import SENSORS, ExtSensorEntityDescription, Tag
+from .fordpass_handler import UNSUPPORTED
 
 _LOGGER = logging.getLogger(__name__)
 

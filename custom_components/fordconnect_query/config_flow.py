@@ -4,6 +4,7 @@ from typing import Any
 
 import aiohttp
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_TOKEN, CONF_SCAN_INTERVAL, CONF_USERNAME
@@ -11,8 +12,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
-
-from custom_components.fordconnect_query.const import (
+from .const import (
     DOMAIN,
     CONFIG_VERSION,
     CONFIG_MINOR_VERSION,
@@ -24,7 +24,7 @@ from custom_components.fordconnect_query.const import (
     DEFAULT_SCAN_INTERVAL,
     MIN_SCAN_INTERVAL,
 )
-from custom_components.fordconnect_query.const_shared import (
+from .const_shared import (
     DEFAULT_PRESSURE_UNIT,
     PRESSURE_UNITS,
     CONF_PRESSURE_UNIT,
