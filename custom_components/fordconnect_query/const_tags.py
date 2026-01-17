@@ -4,26 +4,26 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Final, NamedTuple, Callable, Any
 
-from custom_components.fordpass.fordpass_handler import FordpassDataHandler, UNSUPPORTED
-
 from custom_components.fordconnect_query.const_shared import (
     RCC_TEMPERATURES_CELSIUS,
     ZONE_LIGHTS_OPTIONS,
     RCC_SEAT_OPTIONS_FULL,
     ELVEH_TARGET_CHARGE_OPTIONS
 )
+from custom_components.fordconnect_query.fordpass_handler import FordpassDataHandler, UNSUPPORTED
 from homeassistant.components.button import ButtonEntityDescription
 from homeassistant.components.number import NumberEntityDescription, NumberMode, NumberDeviceClass
 from homeassistant.components.select import SelectEntityDescription
 from homeassistant.components.sensor import SensorStateClass, SensorDeviceClass, SensorEntityDescription
 from homeassistant.const import (
+    PERCENTAGE,
     UnitOfTime,
     UnitOfEnergy,
     UnitOfSpeed,
     UnitOfLength,
     UnitOfTemperature,
     UnitOfElectricCurrent,
-    PERCENTAGE, EntityCategory
+    EntityCategory
 )
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util.unit_system import UnitSystem
