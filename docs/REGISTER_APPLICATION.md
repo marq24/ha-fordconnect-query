@@ -21,28 +21,10 @@
 9. Check the _All Available Data Categories_, check that _you are not a robot_ (don't cheat) and press _Submit_<br/><table><tr><td><img src="img004.png" width="375" /></td></tr></table>
 10. Finally, you have your _Client ID_ and _Client Secret_, save them at a secure place. We will need them shortly. _If this dialog does not appear, then the check if the specified URL is failing. Please double-check that the URL that you might have specified additionally to `https://my.home-assistant.io/redirect/oauth` is reachable from the Ford backend system._
 
-    ### Continue with the configuration
-    The first thing you will be requested to do is to configure the application credentials in Home Assistant for the integration. Once this is done, your credentials will be stored by HA and can be used by the integration at any time.
+### Having issues with the registration?
+Please note that I just wrote this guide to make it easier for you to get started. At the end of the day this is a service from Ford, provided by Ford, implemented by Ford, running by Ford. So you might, can already guess that __I am not able to provide any help or support here__.
 
-    <table><tr><td><img src="img005.png" width="375" /></td></tr></table><br/>
-    Specify any name for the credentials, and then pase your clientId and clientSecret that you have received from the Ford developer portal for your registered application.
+All my experience I have collected when registering an application is documented here in this REGISTER_APPLICATION.md file. There have been reportes that the registration process has not been working properly for _unknown_ reasons – waiting a couple of hours or even days had helped in some cases. But at the end of the day __contact Ford directly if you have issues with the application registration process__.
 
-    Once the credentials are stored, you will be instantly redirected to the Ford login page in a second browser window, where you should log in with your Ford account.<br/>
-    <table><tr><td><img src="img006a.png" width="375" /></td></tr></table>
-
-    If the login is successful, you should see a screen like this one:<br/>
-    <table><tr><td><img src="img006b.png" width="375" /></td></tr></table>
-
-    Select the radio button and scroll down to the _Consent_ Button and press it...
-
-    If you have __multiple vehicles__ registered with your Ford account, then in this screen you can select the vehicle you want to connect to HA (by selecting the wanted vehicle's radio button).<br/>
-    <table><tr><td><img src="img006c.png" width="375" /></td></tr></table>
-
-    #### When you receive the following error message after pressing the _Consent_ button... 
-    <table><tr><td><img src="img007.png" width="375" /></td></tr></table><br/>
-    This means, then the global deployment of your registered application did not complete yet (when you created it in the Ford developer portal, there was a message that this might take up to 2h to complete – so please be patient). And try the configuration of the FordConnect Query Integration in HA later.
-
-    #### When your app is successfully configured &amp; registered with Ford, then...
-    your browser session will be redirected to the https://my.home-assistant.io website and going to display a screen like this one here:<br/>
-    <table><tr><td><img src="img008.png" width="375" /></td></tr></table><br/>
-    You should check if the currently configured HA Instance URL is the one you are currently using (is the URL from which you initially started the configuration of the vehicle). Again look at the area marked with the purple box (here in this example I am running my test/integration HA on `http://localhost:8123`).
+### Continue with the configuration
+Now you should wait at least 2h for the Ford backend system to process your request. Then you can continue with the configuration as it's described in the [integration Setup Guide](CONFIGURE_INTEGRATION.md)
