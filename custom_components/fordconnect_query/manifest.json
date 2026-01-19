@@ -8,5 +8,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/marq24/ha-fordconnect-query/issues",
   "requirements": [],
-  "version": "2026.1.4"
+  "version": "2026.1.5"
 }

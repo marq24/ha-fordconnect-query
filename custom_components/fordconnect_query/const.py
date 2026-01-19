@@ -33,7 +33,7 @@ FORD_EV_CHARGE_SCHEDULES_TEMP: Final = "{base_url}/electric/charge-schedules"
 FORD_EV_SESSIONS_TEMP: Final         = "{base_url}/fccs?startDate={start}&endDate={end}"
 
 TRANSLATIONS: Final = {
-    "de":{
+    "de": {
         "account": "Konto",
         "coord_null_data": "Es konnten keine Daten abgerufen werden. Bitte prüfe Dein Home Assistant System Protokoll auf mögliche Fehlermeldungen der Integration.",
         "coord_no_vehicle_data": "Es konnten keine Daten zu Deinem konfigurierten Fahrzeug abgerufen werden. Bitte prüfe Dein Home Assistant System Protokoll auf mögliche Fehlermeldungen der Integration."
@@ -42,5 +42,10 @@ TRANSLATIONS: Final = {
         "account": "Account",
         "coord_null_data": "Coordinator could not provided any data. Please check your Home Assistant system log for possible error messages.",
         "coord_no_vehicle_data": "Coordinator could not fetch essential information from your configured vehicle. Please check your Home Assistant system log for possible error messages."
+    },
+    "nl": {
+        "account": "Account",
+        "coord_null_data": "Coördinator kon geen gegevens leveren. Controleer uw Home Assistant-systeemlogboek op mogelijke foutmeldingen.",
+        "coord_no_vehicle_data": "Coördinator kon essentiële informatie van uw geconfigureerde voertuig niet ophalen. Controleer uw Home Assistant-systeemlogboek op mogelijke foutmeldingen."
     }
 }

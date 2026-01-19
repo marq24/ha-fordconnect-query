@@ -328,7 +328,6 @@ class FordpassDataHandler:
                 attrs["panicAlarmStatus"] = val
         return attrs or None
 
-
     # DOOR_LOCK state
     def get_door_lock_state(data, prev_state=None):
         # EXAMPLE data:
@@ -965,13 +964,16 @@ class FordpassDataHandler:
 
     def get_messages_attrs(data, units:UnitSystem):
         attrs = {}
-        count = 1
-        for a_msg in data.get(ROOT_MESSAGES, []):
-            attrs[f"msg{count:03}_Date"] = f"{a_msg['createdDate']}"
-            attrs[f"msg{count:03}_Type"] = f"{a_msg['messageType']}"
-            attrs[f"msg{count:03}_Subject"] = f"{a_msg['messageSubject']}"
-            attrs[f"msg{count:03}_Content"] = f"{a_msg['messageBody']}"
-            count = count + 1
+        msg_data = data.get(ROOT_MESSAGES, [])
+        if len(msg_data) > 0:
+            attrs["json_src"] = msg_data.copy()
+            count = 1
+            for a_msg in msg_data:
+                attrs[f"msg{count:03}_Date"] = f"{a_msg['createdDate']}"
+                attrs[f"msg{count:03}_Type"] = f"{a_msg['messageType']}"
+                attrs[f"msg{count:03}_Subject"] = f"{a_msg['messageSubject']}"
+                attrs[f"msg{count:03}_Content"] = f"{a_msg['messageBody']}"
+                count = count + 1
         return attrs
 
 
