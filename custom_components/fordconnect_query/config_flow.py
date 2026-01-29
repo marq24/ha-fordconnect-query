@@ -121,6 +121,10 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
             data_schema=vol.Schema({
                 vol.Required(CONF_TITLE, default="FordConnect Query"): str,
             }),
+            description_placeholders={
+                "repo": "https://github.com/marq24/ha-fordconnect-query",
+                "github": "https://github.com/marq24"
+            },
             errors=errors
             )
 
@@ -135,7 +139,10 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
         if user_input is None:
             return self.async_show_form(
                 step_id="reauth_confirm_connect",
-                description_placeholders={CONF_USERNAME: reauth_entry.data.get(CONF_VIN, "Unknown Vehicle")},
+                description_placeholders={
+                    CONF_USERNAME: reauth_entry.data.get(CONF_VIN, "Unknown Vehicle"),
+                    "repo": "https://github.com/marq24/ha-fordconnect-query"
+                },
                 errors={},
             )
         else:
