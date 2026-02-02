@@ -11,7 +11,7 @@ from typing import Any, Final
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfPressure, CONF_SCAN_INTERVAL
+from homeassistant.const import UnitOfPressure, CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.config_entry_oauth2_flow import (
@@ -57,9 +57,7 @@ from .fordpass_handler import (
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA:Final = vol.Schema({DOMAIN: vol.Schema({})}, extra=vol.ALLOW_EXTRA)
-#PLATFORMS = ["button", "lock", "number", "sensor", "switch", "select", "device_tracker"]
-PLATFORMS:Final = ["sensor", "device_tracker"]
-
+PLATFORMS:Final = [Platform.SENSOR, Platform.DEVICE_TRACKER]
 LAST_TOKEN_KEY:Final = "last_token"
 DATA_STORAGE_KEY:Final = "temp_data_storage"
 TIME_KEY:Final = "time"
@@ -546,7 +544,7 @@ class FordPassEntity(CoordinatorEntity):
     _attr_has_entity_name = True
     _attr_name_addon = None
 
-    def __init__(self, a_tag: Tag, coordinator: FordConQDataCoordinator, description: EntityDescription | None = None):
+    def __init__(self, entity_type:str, a_tag: Tag, coordinator: FordConQDataCoordinator, description: EntityDescription | None = None):
         """Initialize the entity."""
         super().__init__(coordinator, description)
 
@@ -562,7 +560,7 @@ class FordPassEntity(CoordinatorEntity):
             self._attr_name_addon = description.name_addon
 
         self.coordinator: FordConQDataCoordinator = coordinator
-        self.entity_id = f"{DOMAIN}.fcq_{self.coordinator._vin.lower()}_{a_tag.key}"
+        self.entity_id = f"{entity_type}.fcq_{self.coordinator._vin.lower()}_{a_tag.key}"
         self._tag = a_tag
 
     def _name_internal(self, device_class_name: str | None, platform_translations: dict[str, Any], ) -> str | UndefinedType | None:
