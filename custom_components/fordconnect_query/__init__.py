@@ -581,7 +581,7 @@ class FordPassEntity(CoordinatorEntity):
     @property
     def unique_id(self):
         """Return the unique ID of the entity."""
-        return f"fcq_uid_{self.coordinator._vin.lower()}_{self._tag.key}"
+        return f"fcq_uid_{self.coordinator._vin}_{self._tag.key}".lower()
 
     @property
     def device_info(self):
