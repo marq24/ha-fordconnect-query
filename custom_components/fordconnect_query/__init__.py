@@ -14,6 +14,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfPressure, CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import entity_registry as the_entity_registry
 from homeassistant.helpers.config_entry_oauth2_flow import (
     # ImplementationUnavailableError,
     OAuth2Session,
@@ -32,7 +33,9 @@ from .const import (
     FORD_VEH_HEALTH_TEMP,
     TRANSLATIONS,
     DEFAULT_SCAN_INTERVAL,
-    CONF_GARAGE_DATA, FORD_FCON_QUERY_BASE_URL
+    CONF_GARAGE_DATA,
+    FORD_FCON_QUERY_BASE_URL,
+    CONFIG_VERSION, CONFIG_MINOR_VERSION
 )
 from .const_shared import (
     CONF_PRESSURE_UNIT,
@@ -66,6 +69,33 @@ RATE_LIMIT_INDICATOR:Final = "RATE_LIMIT"
 
 OAUTH_TOKEN_KEY:Final = "token"
 OAUTH_ACCESS_TOKEN_KEY:Final = "access_token"
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+
+    # ensure that all our 'unique_id's are lower-case!
+    if config_entry.version == 1 and config_entry.minor_version == 0:
+        _LOGGER.info(f"async_migrate_entry(): Migrating configuration from version {config_entry.version}.{config_entry.minor_version}")
+
+        registry = the_entity_registry.async_get(hass)
+        entities = the_entity_registry.async_entries_for_config_entry(registry, config_entry.entry_id)
+
+        for entity in entities:
+            # 'entity' is an instance of RegistryEntry
+            if entity.unique_id != entity.unique_id.lower():
+                new_unique_id = entity.unique_id.lower()
+                _LOGGER.info(f"Entity ID: {entity.entity_id}, Unique ID: {entity.unique_id} updated!")
+                for already_existing_entity in entities:
+                    if already_existing_entity.unique_id == new_unique_id:
+                        _LOGGER.info(f"Entity ID: {entity.entity_id}, Unique ID: {new_unique_id} already exists! - Will PURGE previous {already_existing_entity.entity_id}")
+                        registry.async_remove(already_existing_entity.entity_id)
+
+                registry.async_update_entity(entity.entity_id, new_unique_id=new_unique_id)
+
+        hass.config_entries.async_update_entry(config_entry, version=CONFIG_VERSION, minor_version=CONFIG_MINOR_VERSION)
+        _LOGGER.info(f"async_migrate_entry(): Migration to configuration version {config_entry.version}.{config_entry.minor_version} successful")
+
+    return True
 
 async def async_setup(hass: HomeAssistant, config: dict):
     #hass.data.setdefault(DOMAIN, {})
@@ -581,7 +611,7 @@ class FordPassEntity(CoordinatorEntity):
     @property
     def unique_id(self):
         """Return the unique ID of the entity."""
-        return f"fcq_uid_{self.coordinator._vin.lower()}_{self._tag.key}"
+        return f"fcq_uid_{self.coordinator._vin}_{self._tag.key}".lower()
 
     @property
     def device_info(self):

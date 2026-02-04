@@ -8,7 +8,7 @@ NAME: Final = "FordConnect Query (for EU) integration for Home Assistant"
 ISSUE_URL: Final = "https://github.com/marq24/ha-fordconnect-query/issues"
 
 CONFIG_VERSION: Final = 1
-CONFIG_MINOR_VERSION: Final = 0
+CONFIG_MINOR_VERSION: Final = 1
 
 CONF_VIN = "vin"
 CONF_GARAGE_DATA = "garage"
