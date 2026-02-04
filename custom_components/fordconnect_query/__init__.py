@@ -517,7 +517,7 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
         health_data = await self.__request_data(FORD_VEH_HEALTH_TEMP, "health")
         return health_data
 
-    async def __request_data(self, url_template:str, type:str):
+    async def __request_data(self, url_template:str, logging_type:str):
         url = url_template.format(base_url=FORD_FCON_QUERY_BASE_URL)
         res = await self._session.async_request(
             method="get",
@@ -527,26 +527,26 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
             res.raise_for_status()
             response_data = await res.json()
             if response_data is not None:
-                _LOGGER.debug(f"{self.vli}request_{type}(): {len(response_data)} - {response_data.keys() if response_data is not None else 'None'}")
+                _LOGGER.debug(f"{self.vli}request_{logging_type}(): {len(response_data)} - {response_data.keys() if response_data is not None else 'None'}")
             else:
-                _LOGGER.debug(f"{self.vli}request_{type}(): No data received!")
+                _LOGGER.debug(f"{self.vli}request_{logging_type}(): No data received!")
 
             # dumping?
             if self._log_to_filesystem and response_data is not None:
                 try:
-                    await asyncio.get_running_loop().run_in_executor(None, lambda: self.__dump_data(type, response_data))
-                except BaseException as e:
-                    _LOGGER.debug(f"{self.vli}Error while dumping {type} data to file: {type(e).__name__} - {e}")
+                    await asyncio.get_running_loop().run_in_executor(None, lambda: self.__dump_data(logging_type, response_data))
+                except BaseException as exc:
+                    _LOGGER.debug(f"{self.vli}Error while dumping {logging_type} data to file: {type(exc).__name__} - {exc}")
 
             return response_data
 
-        except BaseException as e:
+        except BaseException as exc:
             if res.status == 429:
-                _LOGGER.debug(f"{self.vli}request_{type}():{url} caused {res.status} - rate limit exceeded - sleeping for 15 seconds")
+                _LOGGER.debug(f"{self.vli}request_{logging_type}():{url} caused {res.status} - rate limit exceeded - sleeping for 15 seconds")
                 self._last_update_time = time.monotonic()
                 return RATE_LIMIT_INDICATOR
             else:
-                _LOGGER.info(f"{self.vli}request_{type}():{url} caused {type(e).__name__} {e}")
+                _LOGGER.info(f"{self.vli}request_{logging_type}():{url} caused {type(exc).__name__} {exc}")
                 stack_trace = traceback.format_stack()
                 stack_trace_str = ''.join(stack_trace[:-1])  # Exclude the call to this function
                 _LOGGER.debug(f"{self.vli}stack trace (for marq24 to be able to debug):\n{stack_trace_str}")
