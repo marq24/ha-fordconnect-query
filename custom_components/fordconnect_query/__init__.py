@@ -226,6 +226,7 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
         self.last_update_success = False
         self._vin = config_entry.data["vin"]
         self._last_update_time = 0
+        self._rate_limit_hit = False
 
         # just copied over must check later...
         self._config_entry = config_entry
@@ -476,15 +477,23 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         _LOGGER.debug(f"{self.vli}_async_update_data(): Updating data for VIN: {self._vin}")
         now = time.monotonic()
-        if now - self._last_update_time < 15:
+        if self._rate_limit_hit and now - self._last_update_time < 60:
             _LOGGER.debug(f"{self.vli}Rate limit: Returning cached data (last update {now - self._last_update_time:.1f}s ago)")
-            return self.data
+            if self.data is not None:
+                return self.data
 
         # IMHO this is not required for an OAuth2Session
         await self._session.async_ensure_token_valid()
         telemetry_data = await self.request_telemetry()
-        if telemetry_data is None or telemetry_data == RATE_LIMIT_INDICATOR:
+        if telemetry_data is None:
             raise UpdateFailed("No data received from Ford API (or exception/error)")
+        elif RATE_LIMIT_INDICATOR in telemetry_data:
+            if self.data is None:
+                # we are in the initial startup phase of the integration... since we have no self.data yet (that
+                # we could return)
+                raise UpdateFailed("API not ready yet - please retry later", retry_after=float(telemetry_data.get(RATE_LIMIT_INDICATOR, 62)))
+            else:
+                return self.data
         else:
             pass
             # health_data = await self.request_health()
@@ -499,6 +508,7 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
 
         if telemetry_data is not None:
             self._last_update_time = time.monotonic()
+            self._rate_limit_hit = False
             return telemetry_data
             # result = {}
             # if ROOT_METRICS in telemetry_data:
@@ -542,9 +552,18 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
 
         except BaseException as exc:
             if res.status == 429:
-                _LOGGER.debug(f"{self.vli}request_{logging_type}():{url} caused {res.status} - rate limit exceeded - sleeping for 15 seconds")
+                try:
+                    val = res.headers.get("Retry-After")
+                    if val is not None and val.isdigit():
+                        retry_after = int(val)
+                    else:
+                        retry_after = 62
+                except (ValueError, TypeError):
+                    retry_after = 62
+                _LOGGER.debug(f"{self.vli}request_{logging_type}():{url} caused {res.status} - rate limit exceeded - sleeping for {retry_after} seconds")
                 self._last_update_time = time.monotonic()
-                return RATE_LIMIT_INDICATOR
+                self._rate_limit_hit = True
+                return {RATE_LIMIT_INDICATOR: retry_after}
             else:
                 _LOGGER.info(f"{self.vli}request_{logging_type}():{url} caused {type(exc).__name__} {exc}")
                 stack_trace = traceback.format_stack()
