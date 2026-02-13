@@ -8,6 +8,7 @@ from typing import Final, Iterable
 from homeassistant.const import UnitOfLength, UnitOfTemperature, UnitOfPressure
 from homeassistant.util import dt
 from homeassistant.util.unit_system import UnitSystem
+
 from .const_shared import (
     ZONE_LIGHTS_VALUE_ALL_ON,
     ZONE_LIGHTS_VALUE_FRONT,
@@ -754,6 +755,23 @@ class FordpassDataHandler:
             else:
                 return await vehicle.pause_charge()
 
+    def _get_eleveh_charging_power_from_metrics(data_metrics):
+        if "xevBatteryChargerVoltageOutput" in data_metrics and "xevBatteryChargerCurrentOutput" in data_metrics:
+            ch_volt = float(data_metrics.get("xevBatteryChargerVoltageOutput", {}).get("value", 0))
+            ch_amps = float(data_metrics.get("xevBatteryChargerCurrentOutput", {}).get("value", 0))
+            if isinstance(ch_volt, Number) and ch_volt != 0 and isinstance(ch_amps, Number) and ch_amps != 0:
+                return round((ch_volt * ch_amps) / 1000, 2)
+            elif isinstance(ch_volt, Number) and ch_volt != 0 and "xevBatteryIoCurrent" in data_metrics:
+                # Get Battery Io Current for DC Charging calculation
+                batt_amps = float(data_metrics.get("xevBatteryIoCurrent", {}).get("value", 0))
+                # DC Charging calculation: Use absolute value for amperage to handle negative values
+                if isinstance(batt_amps, Number) and batt_amps != 0:
+                    return round((ch_volt * abs(batt_amps)) / 1000, 2)
+                else:
+                    return 0
+            else:
+                return 0
+        return None
 
     def get_elveh_charging_attrs(data, units:UnitSystem):
         data_metrics = FordpassDataHandler.get_metrics(data)
@@ -781,22 +799,9 @@ class FordpassDataHandler:
                 attrs[attr_name] = transform_fn(value, units)
 
         # handle the self-calculated custom metrics stuff
-        if "xevBatteryChargerVoltageOutput" in data_metrics and "xevBatteryChargerCurrentOutput" in data_metrics:
-            ch_volt = attrs.get("chargingVoltage", 0)
-            ch_amps = attrs.get("chargingAmperage", 0)
-
-            if isinstance(ch_volt, Number) and ch_volt != 0 and isinstance(ch_amps, Number) and ch_amps != 0:
-                attrs["chargingkW"] = round((ch_volt * ch_amps) / 1000, 2)
-            elif isinstance(ch_volt, Number) and ch_volt != 0 and "xevBatteryIoCurrent" in data_metrics:
-                # Get Battery Io Current for DC Charging calculation
-                batt_amps = float(data_metrics.get("xevBatteryIoCurrent", {}).get("value", 0))
-                # DC Charging calculation: Use absolute value for amperage to handle negative values
-                if isinstance(batt_amps, Number) and batt_amps != 0:
-                    attrs["chargingkW"] = round((ch_volt * abs(batt_amps)) / 1000, 2)
-                else:
-                    attrs["chargingkW"] = 0
-            else:
-                attrs["chargingkW"] = 0
+        charging_kw = FordpassDataHandler._get_eleveh_charging_power_from_metrics(data_metrics)
+        if charging_kw is not None:
+            attrs["chargingkW"] = charging_kw
 
         if "xevBatteryTimeToFullCharge" in data_metrics:
             cs_update_time = dt.parse_datetime(data_metrics.get("xevBatteryTimeToFullCharge", {}).get("updateTime", 0))
@@ -840,6 +845,12 @@ class FordpassDataHandler:
 
         return attrs
 
+    # ELVEH_CHARGING_power state
+    def get_elveh_charging_power_state(data, prev_state=None):
+        charging_kw = FordpassDataHandler._get_eleveh_charging_power_from_metrics(data_metrics = FordpassDataHandler.get_metrics(data))
+        if charging_kw is not None:
+            return charging_kw
+        return None
 
     # ELVEH_PLUG attributes
     def get_elveh_plug_attrs(data, units:UnitSystem):
@@ -1494,6 +1505,7 @@ class FordpassDataHandler:
                 if await vehicle.delete_messages([message_ids[0]]):
                     await vehicle.ws_check_for_message_update_required()
                     return True
+        return False
 
     async def messages_delete_all(coordinator, vehicle):
         msgs = coordinator.data.get(ROOT_MESSAGES, {})
@@ -1503,6 +1515,27 @@ class FordpassDataHandler:
                 if await vehicle.delete_messages(message_ids):
                     await vehicle.ws_check_for_message_update_required()
                     return True
+        return False
+
+    async def messages_delete_with_id_called_from_service(coordinator, msg_id: int):
+        _LOGGER.debug(f"messages_delete_id_from_service(): msg_id: {msg_id} called...")
+        msgs = coordinator.data.get(ROOT_MESSAGES, {})
+        if len(msgs) > 0:
+            message_ids = [int(message['messageId']) for message in msgs if (len(message['relevantVin']) == 0 or message['relevantVin'] == coordinator.bridge.vin)]
+            if len(message_ids) > 0:
+                if msg_id in message_ids:
+                    _LOGGER.debug(f"messages_delete_id_from_service(): will delete message_id: {msg_id} now")
+                    if await coordinator.bridge.delete_messages([msg_id]):
+                        _LOGGER.debug(f"messages_delete_id_from_service(): message_id: {msg_id} deleted successfully")
+                        await coordinator.bridge.ws_check_for_message_update_required()
+                        return True
+                else:
+                    _LOGGER.debug(f"messages_delete_id_from_service(): message id not found in available messages: {message_ids}")
+            else:
+                _LOGGER.debug(f"messages_delete_id_from_service(): no messages found for vin: {coordinator.bridge.vin}")
+        else:
+            _LOGGER.debug(f"messages_delete_id_from_service(): no messages found in coordinator.data")
+        return False
 
     # just for development purposes...
     async def start_charge_vehicle(coordinator, vehicle):
