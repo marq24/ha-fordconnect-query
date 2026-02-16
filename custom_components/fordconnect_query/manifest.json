@@ -5,6 +5,7 @@
   "config_flow": true,
   "dependencies": ["application_credentials", "http"],
   "documentation": "https://github.com/marq24/ha-fordconnect-query",
+  "integration_type": "device",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/marq24/ha-fordconnect-query/issues",
   "requirements": [],
