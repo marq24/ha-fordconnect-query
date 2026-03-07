@@ -72,6 +72,9 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
                     CONF_NAME: garage_data.get("vehicleType", "Ford Vehicle"),
                     CONF_GARAGE_DATA: garage_data
                 }
+                if self.source == config_entries.SOURCE_REAUTH:
+                    return self.async_update_reload_and_abort(self._get_reauth_entry(), data=entry_data)
+
                 a_fallback_title = f"{garage_data.get('color', 'A FordConnect')} {garage_data.get('modelName', '')}".strip()
                 a_title = self.hass.data.get(DOMAIN, {}).get(TITLE_MAP, {}).get(self.flow_id, a_fallback_title)
                 return self.async_create_entry(title=a_title, data=entry_data)
