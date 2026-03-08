@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Final
 
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfPressure, CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
@@ -23,9 +22,10 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.storage import STORAGE_DIR
 from homeassistant.helpers.typing import UNDEFINED, UndefinedType
-from homeassistant.helpers.update_coordinator import UpdateFailed, DataUpdateCoordinator, CoordinatorEntity
+from homeassistant.helpers.update_coordinator import UpdateFailed, DataUpdateCoordinator
 from homeassistant.loader import async_get_integration
 from homeassistant.util.unit_system import UnitSystem
+
 from .const import (
     DOMAIN,
     CONF_VIN,
@@ -48,6 +48,7 @@ from .const_shared import (
     DEFAULT_PRESSURE_UNIT, CONF_LOG_TO_FILESYSTEM,
 )
 from .const_tags import Tag, FUEL_OR_PEV_ONLY_TAGS, EV_ONLY_TAGS, RCC_TAGS
+from .entity import CustomFriendlyNameEntity
 from .fordpass_handler import (
     UNSUPPORTED,
     ROOT_METRICS,
@@ -587,7 +588,7 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
         except BaseException as e:
             _LOGGER.info(f"{self.vli}__dump_data(): Error while writing data to file '{filename}' - {type(e).__name__} - {e}")
 
-class FordPassEntity(CoordinatorEntity):
+class FordPassEntity(CustomFriendlyNameEntity):
     """Defines a base FordPass entity."""
     _attr_should_poll = False
     _attr_has_entity_name = True
