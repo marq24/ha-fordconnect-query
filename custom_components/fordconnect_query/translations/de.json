@@ -4,12 +4,14 @@
             "options": {
                 "aaa": "------ FORD Fahrzeuge ------",
                 "deu": "Deutschland",
+                "dnk": "Dänemark",
                 "fra": "Frankreich",
                 "nld": "Niederlande",
                 "ita": "Italien",
                 "esp": "Spanien",
                 "nor": "Norwegen",
                 "pol": "Polen",
+                "prt": "Portugal",
                 "gbr": "Vereinigtes Königreich Großbritannien und Irland",
                 "aus": "Australien [benötigt einen 'ford.com.au/ford.co.nz' Konto]",
                 "nzl": "Neuseeland [benötigt einen 'ford.co.nz/ford.com.au' Konto]",
@@ -43,6 +45,7 @@
             "already_configured": "Konto ist bereits konfiguriert",
             "no_vehicles": "Keine Fahrzeuge im Konto oder alle sind bereits konfiguriert",
             "reauth_successful": "Re-Autorisierung abgeschlossen",
+            "reconfigure_successful": "Die Neukonfiguration war erfolgreich",
             "reauth_reload_failed": "Re-Authorization abgeschlossen\n\nDie Integration konnte jedoch nicht neu geladen werden. Bitte starte Home Assistant neu, um die erneute Autorisierung abzuschließen, oder überprüfe dein System Protokoll für weitere Details.",
             "reauth_unsuccessful": "Re-Autorisierung fehlgeschlagen\n\nBitte prüf Deinen Login und versuche es erneut",
             "reauth_not_possible": "Keine gültige Region gefunden\n\nDu musst die Integration leider ganz neu konfigirieren",
@@ -123,15 +126,15 @@
                 }
             },
             "new_account_lincoln": {
-                  "data": {
-                      "password": "The Lincoln Way™ Passwort",
-                      "username": "The Lincoln Way™ Username (Email)",
-                      "region" : "The Lincoln Way™ Region"
-                  },
-                  "data_description": {
-                      "username": "Wenn Du ein Mobiltelefon statt einer E-Mail-Adresse verwendest, gib bitte Deine Nummer (ohne die anfängliche 0) sowie + und die Landesvorwahl ein (z. B. +99123456789).",
-                      "region": "Die Region, die Du auswählst, muss mit der Region übereinstimmen, für die Du dein The Lincoln Way™-Konto registriert hast. Weitere Details auf GitHub"
-                  }
+                "data": {
+                    "password": "The Lincoln Way™ Passwort",
+                    "username": "The Lincoln Way™ Username (Email)",
+                     "region" : "The Lincoln Way™ Region"
+                },
+                "data_description": {
+                    "username": "Wenn Du ein Mobiltelefon statt einer E-Mail-Adresse verwendest, gib bitte Deine Nummer (ohne die anfängliche 0) sowie + und die Landesvorwahl ein (z. B. +99123456789).",
+                    "region": "Die Region, die Du auswählst, muss mit der Region übereinstimmen, für die Du dein The Lincoln Way™-Konto registriert hast. Weitere Details auf GitHub"
+                }
             },
             "vehicle": {
                 "title": "Zum Hinzufügen ein Fahrzeug auswählen",

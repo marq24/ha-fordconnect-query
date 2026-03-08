@@ -4,7 +4,6 @@ from typing import Any
 
 import aiohttp
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_TOKEN, CONF_SCAN_INTERVAL, CONF_USERNAME
@@ -12,6 +11,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+
 from .const import (
     DOMAIN,
     CONFIG_VERSION,
@@ -73,7 +73,7 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
                     CONF_GARAGE_DATA: garage_data
                 }
                 if self.source == config_entries.SOURCE_REAUTH:
-                    return self.async_update_reload_and_abort(self._get_reauth_entry(), data=entry_data)
+                    return self.async_update_reload_and_abort(self._get_reauth_entry(), data=entry_data, reason="reauth_successful")
 
                 a_fallback_title = f"{garage_data.get('color', 'A FordConnect')} {garage_data.get('modelName', '')}".strip()
                 a_title = self.hass.data.get(DOMAIN, {}).get(TITLE_MAP, {}).get(self.flow_id, a_fallback_title)
