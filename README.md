@@ -115,16 +115,17 @@ Installing the integration on your Home Assistant instance can be done either vi
 
 [![Open your Home Assistant instance and adding repository to HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marq24&repository=ha-fordconnect-query&category=integration)
 
+<!--
 1. In HA HACS, you need to add a new custom repository (via the 'three dots' menu in the top right corner).
 2. Enter `https://github.com/marq24/ha-fordconnect-query` as the _Repository URL_ and select the _Type_ `Integration`.
 
 > [!IMPORTANT]
 > This is a HACS __custom integration__ — not a Home Assistant __Add-on__. Don't try to add this repository as an add-on in Home Assistant.
 >
-
-3. After adding the new repository, you can search for `fordconnect` in the search bar.
-4. Install the 'correct' (aka 'this') FordConnect Query integration (v2026.1.0 or higher).
-5. Restart HA.
+-->
+1. Search for `fordconnect` in the search bar.
+2. Install the 'correct' (aka 'this') __FordConnect Query (for EU)__ (v2026.1.0 or higher).
+3. Restart HA.
 
 
 #### Option B: manual steps
@@ -318,7 +319,7 @@ If you like this integration and want to support the development, please conside
 
 
 [hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge&logo=homeassistantcommunitystore&logoColor=ccc
+[hacsbadge]: https://img.shields.io/badge/HACS-default-blue.svg?style=for-the-badge&logo=homeassistantcommunitystore&logoColor=ccc
 
 [ghs]: https://github.com/sponsors/marq24
 [ghsbadge]: https://img.shields.io/github/sponsors/marq24?style=for-the-badge&logo=github&logoColor=ccc&link=https%3A%2F%2Fgithub.com%2Fsponsors%2Fmarq24&label=Sponsors
