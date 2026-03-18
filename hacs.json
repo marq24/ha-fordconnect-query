@@ -1,5 +1,5 @@
 {
-	"name": "FordConnect Query (for EU)",
+	"name": "FordConnect Query (for EU/UK/NA)",
 	"content_in_root": false,
     "homeassistant": "2025.10.0",
     "hacs": "1.18.0",

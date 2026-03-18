@@ -20,7 +20,7 @@ ___These are just example credentials – and they will not work – don't waste
 
 or
 1. Go to  `Settings` -> `Devices & Services` area
-2. Add the new integration `FordConnect Query (for EU)`
+2. Add the new integration `FordConnect Query (for EU/UK/NA)`
 
 ### Continue with the configuration
 The first thing you will be requested to do is to configure the application credentials in Home Assistant for the integration. Once this is done, your credentials will be stored by HA and can be used by the integration at any time.

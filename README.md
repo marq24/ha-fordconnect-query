@@ -5,9 +5,9 @@
 This is an alternative [integration to FordPass](https://github.com/marq24/ha-fordpass), making use of the FordConnect Query API. This API provides __read-only__ access to the vehicle data.
 ### Requirements
 - Your car must have the latest on-board modem functionality and have been registered/authorized with the FordPass™ application
-- An API credential pair previously registered with the EU Ford developer portal.
+- An API credential pair previously registered with the EU/UK/NA Ford developer portal.
 
-Further information can be found in [_the Application Registration Guide_. This includes a step-by-step procedure](https://github.com/marq24/ha-fordconnect-query/blob/main/docs/REGISTER_APPLICATION.md) to register an application at Fords EU developer portal.
+Further information can be found in [_the Application Registration Guide_. This includes a step-by-step procedure](https://github.com/marq24/ha-fordconnect-query/blob/main/docs/REGISTER_APPLICATION.md) to register an application at Fords EU/UK/NA developer portal.
 ### Need further instructions?
 All other setup details can be found in the [Integration Setup Guide](https://github.com/marq24/ha-fordconnect-query/blob/main/docs/CONFIGURE_INTEGRATION.md)
 ### Final note
@@ -18,7 +18,7 @@ If you find this integration useful, please consider supporting me as a GitHub p
 Dies ist eine [alternative Integration zu FordPass](https://github.com/marq24/ha-fordpass), die die FordConnect Query API nutzt. Diese API bietet __read.only__ Zugriff auf Deine Fahrzeugdaten.
 ### Voraussetzungen
 - Dein Fahrzeug muss über die neueste On-Board-Modem-Funktionalität verfügen und bei der FordPass™-Anwendung registriert/autorisiert sein.
-- Einen API-Schlüssel, der zuvor im EU-Ford-Entwicklerportal registriert wurde.
+- Einen API-Schlüssel, der zuvor im EU/UK/NA-Ford-Entwicklerportal registriert wurde.
 
 Weitere Informationen findest Du [im _Application Registration Guide_. Dort findest Du auch eine Schritt-für-Schritt-Anleitung](https://github.com/marq24/ha-fordconnect-query/blob/main/docs/REGISTER_APPLICATION.md) zur Registrierung eines solchen Schlüssels.
 ### Benötigst Du weitere Hilfe?
@@ -79,7 +79,7 @@ https://raw.githubusercontent.com/marq24/ha-fordconnect-query/refs/heads/main/do
 ## Requirements
 1. Your car must have the latest on-board modem functionality and have been registered/authorized with the FordPass™/The Lincoln Way™ application.<br/>
 2. You need a Home Assistant instance (v2025.11 or higher) – additionally, it's also highly recommended to have the [HACS](https://hacs.xyz/docs/use/#getting-started-with-hacs) custom integration installed.<br/>
-3. [You __must have registered an application with Ford in the EU developer portal__](./docs/REGISTER_APPLICATION.md). [Therefore, you need to register a Ford developer account].
+3. [You __must have registered an application with Ford in the EU/UK/NA developer portal__](./docs/REGISTER_APPLICATION.md). [Therefore, you need to register a Ford developer account].
 4. You need to configure OAuth Application Credentials in HA that can be used by this integration. (will be done automatically via the integration setup)
 
 > [!IMPORTANT]
@@ -124,7 +124,7 @@ Installing the integration on your Home Assistant instance can be done either vi
 >
 -->
 1. Search for `fordconnect` in the search bar.
-2. Install the 'correct' (aka 'this') __FordConnect Query (for EU)__ (v2026.1.0 or higher).
+2. Install the 'correct' (aka 'this') __FordConnect Query (for EU/UK/NA)__ (v2026.1.0 or higher).
 3. Restart HA.
 
 
