@@ -97,6 +97,10 @@ https://raw.githubusercontent.com/marq24/ha-fordconnect-query/refs/heads/main/do
 > __Please don't think too complicated:__ Use your __local http address__ of your HA instance when setting up this integration.
 
 
+## Comparison of ha-fordconnect-query and ha-fordpass integrations
+There is another Home Assistant integration for Ford Vehicles called [ha-fordpass](https://github.com/marq24/ha-fordpass). When you are unsure which one to choose, what are the main differences and the interoperability between the two integrations, then please read the [short comparison between the both of the integrations](https://github.com/marq24/ha-fordpass/blob/main/doc/FORDPASS_VS_FORDCONNECT.md) and then make your final decision.
+
+
 ## Installation Instructions
 
 > [!TIP]
