@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Final
 
 import voluptuous as vol
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfPressure, CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
@@ -25,7 +26,6 @@ from homeassistant.helpers.typing import UNDEFINED, UndefinedType
 from homeassistant.helpers.update_coordinator import UpdateFailed, DataUpdateCoordinator
 from homeassistant.loader import async_get_integration
 from homeassistant.util.unit_system import UnitSystem
-
 from .const import (
     DOMAIN,
     CONF_VIN,
@@ -250,6 +250,7 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
         # different supporting booleans - probably none of them will be usefull in FordConnect?!
         self._supports_GUARD_MODE = None
         self._supports_REMOTE_START = None
+        self._supports_REMOTE_LOCK = None
         self._supports_ZONE_LIGHTING = None
         self._supports_ALARM = None
         self._supports_GEARLEVERPOSITION = None
@@ -317,6 +318,8 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
                      Tag.GUARD_MODE,
                      Tag.ZONE_LIGHTING,
                      Tag.ALARM,
+                     Tag.DOOR_LOCK,
+                     Tag.DOOR_UNLOCK,
                      Tag.GEARLEVERPOSITION,
                      Tag.AUTO_UPDATES,
                      Tag.HAF_SHORT, Tag.HAF_DEFAULT, Tag.HAF_LONG]:
@@ -326,6 +329,8 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
                 support_ATTR_NAME = f"_supports_{Tag.REMOTE_START.name}"
             elif a_tag in [Tag.HAF_SHORT, Tag.HAF_DEFAULT, Tag.HAF_LONG]:
                 support_ATTR_NAME = f"_supports_HAF"
+            elif a_tag in [Tag.DOOR_UNLOCK, Tag.DOOR_LOCK]:
+                support_ATTR_NAME = f"_supports_REMOTE_LOCK"
             else:
                 support_ATTR_NAME = f"_supports_{a_tag.name}"
 
@@ -440,6 +445,7 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
         #             for capability_obj in veh_data["vehicleCapabilities"]:
         #                 if capability_obj["VIN"] == self._vin:
         #                     self._supports_ALARM = Tag.ALARM.get_state(self.data) != UNSUPPORTED
+        #                     self._supports_REMOTE_LOCK = self._check_if_veh_capability_supported("remoteLock", capability_obj)
         #                     self._supports_REMOTE_START = self._check_if_veh_capability_supported("remoteStart", capability_obj)
         #                     self._supports_GUARD_MODE = self._check_if_veh_capability_supported("guardMode", capability_obj)
         #                     self._supports_ZONE_LIGHTING = self._check_if_veh_capability_supported("zoneLighting", capability_obj) and self._number_of_lighting_zones > 0
