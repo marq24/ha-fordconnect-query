@@ -50,7 +50,10 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
         if response.get("type", None) == FlowResultType.ABORT:
             _LOGGER.info(f"async_step_creation(): got an FlowResultType.ABORT response: {response}")
             reason = response.get("reason", "UNKNOWN reason")
-            return self.async_abort(reason="oauth_error_final", description_placeholders={"error_info": reason})
+            if response == "reauth_successful":
+                return self.async_abort(reason="reauth_successful")
+            else:
+                return self.async_abort(reason="oauth_error_final", description_placeholders={"error_info": reason})
         else:
             _LOGGER.info(f"async_step_creation(): got response: {response}")
             return response

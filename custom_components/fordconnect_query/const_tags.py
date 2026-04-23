@@ -21,7 +21,6 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util.unit_system import UnitSystem
-
 from .const_shared import (
     ZONE_LIGHTS_OPTIONS,
     RCC_SEAT_OPTIONS_FULL,
@@ -153,6 +152,9 @@ class Tag(ApiKey, Enum):
                                  state_fn=lambda data, prev_state: FordpassDataHandler.get_rcc_state(data, rcc_key="RccHeatedSteeringWheel_Rq"),
                                  on_off_fn=FordpassDataHandler.on_off_rcc_RccHeatedSteeringWheel_Rq)
 
+    DEPARTURE_TIMES     = ApiKey(key="departureTimes",
+                                 state_fn=FordpassDataHandler.get_departure_times_state,
+                                 on_off_fn=FordpassDataHandler.on_off_departure_times)
 
     # SELECTS
     ZONE_LIGHTING       = ApiKey(key="zoneLighting",
@@ -325,6 +327,10 @@ class Tag(ApiKey, Enum):
     LAST_ENERGY_TRANSFER_LOG_ENTRY  = ApiKey(key="energyTransferLogEntry",
                                  state_fn=FordpassDataHandler.get_energy_transfer_log_state,
                                  attrs_fn=FordpassDataHandler.get_energy_transfer_log_attrs)
+
+    DEPARTURE_SCHEDULES = ApiKey(key="departureSchedules",
+                                 state_fn=FordpassDataHandler.get_departure_schedules_state,
+                                 attrs_fn=FordpassDataHandler.get_departure_schedules_attrs)
 
 
     # Debug Sensors (Disabled by default)
@@ -731,7 +737,7 @@ SENSORS = [
     ExtSensorEntityDescription(
         tag=Tag.DEVICECONNECTIVITY,
         key=Tag.DEVICECONNECTIVITY.key,
-        icon="mdi:connection",
+        icon="mdi:wifi",
         has_entity_name=True,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
@@ -751,6 +757,22 @@ SENSORS = [
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         has_entity_name=True,
+    ),
+    ExtSensorEntityDescription(
+        tag=Tag.DOOR_LOCK,
+        key=Tag.DOOR_LOCK.key,
+        icon="mdi:car-door-lock",
+        has_entity_name=True,
+        entity_registry_enabled_default=True
+    ),
+    ExtSensorEntityDescription(
+        tag=Tag.DEPARTURE_SCHEDULES,
+        key=Tag.DEPARTURE_SCHEDULES.key,
+        icon="mdi:car-clock",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        skip_existence_check=True,
+        has_entity_name=True,
+        entity_registry_enabled_default=True
     ),
 
 
@@ -795,13 +817,6 @@ SENSORS = [
         has_entity_name=True,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
-    ExtSensorEntityDescription(
-        tag=Tag.DOOR_LOCK,
-        key=Tag.DOOR_LOCK.key,
-        icon="mdi:car-door-lock",
-        has_entity_name=True,
-        entity_registry_enabled_default=True
-    ),
 ]
 
 # UNHANDLED_METTRICS:
@@ -825,6 +840,8 @@ SWITCHES = {
     Tag.RCC_STEERING_WHEEL: {"icon": "mdi:steering"},
     Tag.RCC_DEFROST_FRONT: {"icon": "mdi:car-defrost-front"},
     Tag.RCC_DEFROST_REAR: {"icon": "mdi:car-defrost-rear"},
+
+    Tag.DEPARTURE_TIMES: {"icon": "mdi:car-clock"}
 }
 
 BUTTONS = [
