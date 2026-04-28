@@ -597,7 +597,6 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
 
 class FordPassEntity(CustomFriendlyNameEntity):
     """Defines a base FordPass entity."""
-    _attr_should_poll = False
     _attr_has_entity_name = True
     _attr_name_addon = None
 
@@ -630,10 +629,6 @@ class FordPassEntity(CustomFriendlyNameEntity):
     @property
     def device_id(self):
         return f"fcq_did_{self.self.coordinator._vin.lower()}"
-
-    @property
-    def should_poll(self) -> bool:
-        return False
 
     @property
     def unique_id(self):
