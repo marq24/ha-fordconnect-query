@@ -291,12 +291,12 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
         # moved from 1'st line to bottom...
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=update_interval_as_int), config_entry=config_entry)
 
-    def tag_not_supported_by_vehicle(self, a_tag: Tag) -> bool:
+    def tag_supported_by_vehicle(self, a_tag: Tag) -> bool:
         if a_tag in FUEL_OR_PEV_ONLY_TAGS:
-            return self.supportFuel is False
+            return self.supportFuel
 
         if a_tag in EV_ONLY_TAGS:
-            return self.supportPureEvOrPluginEv is False
+            return self.supportPureEvOrPluginEv
 
         # handling of the remote climate control tags...
         if a_tag in RCC_TAGS:
@@ -309,7 +309,7 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
                     ret_val = self._supports_HEATED_HEATED_SEAT_MODE != RCC_SEAT_MODE_NONE
 
             #_LOGGER.error(f"{self.vli}Remote Climate Control support: {ret_val} - {a_tag.name}")
-            return ret_val is False
+            return ret_val
 
         # other vehicle dependant tags...
         if a_tag in [Tag.REMOTE_START_STATUS,
@@ -319,25 +319,26 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
                      Tag.GUARD_MODE,
                      Tag.ZONE_LIGHTING,
                      Tag.ALARM,
-                     Tag.DOOR_LOCK,
-                     Tag.DOOR_UNLOCK,
+                     # 2026/005/06 -> we CURRENTLY don't check and '_supports_*' attributes in the coordinator
+                     #Tag.DOOR_LOCK,
+                     #Tag.DOOR_UNLOCK,
                      Tag.GEARLEVERPOSITION,
                      Tag.AUTO_UPDATES,
                      Tag.HAF_SHORT, Tag.HAF_DEFAULT, Tag.HAF_LONG]:
-            # just handling the unpleasant fact, that for 'Tag.REMOTE_START_STATUS' and 'Tag.REMOTE_START' we just
+            # just handling the unpleasant fact that for 'Tag.REMOTE_START_STATUS' and 'Tag.REMOTE_START' we just
             # share the same 'support_ATTR_NAME'...
             if a_tag == Tag.REMOTE_START_STATUS or a_tag == Tag.REMOTE_START_COUNTDOWN or a_tag == Tag.EXTEND_REMOTE_START:
                 support_ATTR_NAME = f"_supports_{Tag.REMOTE_START.name}"
             elif a_tag in [Tag.HAF_SHORT, Tag.HAF_DEFAULT, Tag.HAF_LONG]:
                 support_ATTR_NAME = f"_supports_HAF"
-            elif a_tag in [Tag.DOOR_UNLOCK, Tag.DOOR_LOCK]:
-                support_ATTR_NAME = f"_supports_REMOTE_LOCK"
+            #elif a_tag in [Tag.DOOR_UNLOCK, Tag.DOOR_LOCK]:
+            #    support_ATTR_NAME = f"_supports_REMOTE_LOCK"
             else:
                 support_ATTR_NAME = f"_supports_{a_tag.name}"
 
-            return getattr(self, support_ATTR_NAME, None) is None or getattr(self, support_ATTR_NAME) is False
+            return getattr(self, support_ATTR_NAME, None) is None or getattr(self, support_ATTR_NAME)
 
-        return False
+        return True
 
     @property
     def has_ev_soc(self) -> bool:
