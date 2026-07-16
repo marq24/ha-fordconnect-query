@@ -4,6 +4,7 @@ from typing import Any
 
 import aiohttp
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_TOKEN, CONF_SCAN_INTERVAL, CONF_USERNAME
@@ -11,7 +12,6 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
-
 from .const import (
     DOMAIN,
     CONFIG_VERSION,
@@ -129,7 +129,8 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
             }),
             description_placeholders={
                 "repo": "https://github.com/marq24/ha-fordconnect-query",
-                "github": "https://github.com/marq24"
+                "github": "https://github.com/marq24",
+                "github_root": "https://github.com"
             },
             errors=errors
             )
@@ -147,7 +148,9 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
                 step_id="reauth_confirm_connect",
                 description_placeholders={
                     CONF_USERNAME: reauth_entry.data.get(CONF_VIN, "Unknown Vehicle"),
-                    "repo": "https://github.com/marq24/ha-fordconnect-query"
+                    "repo": "https://github.com/marq24/ha-fordconnect-query",
+                    "github": "https://github.com/marq24",
+                    "github_root": "https://github.com"
                 },
                 errors={},
             )
