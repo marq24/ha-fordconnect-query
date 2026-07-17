@@ -4,7 +4,7 @@ from typing import Final
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN: Final = "fordconnect_query"
-NAME: Final = "FordConnect Query (for EU) integration for Home Assistant"
+NAME: Final = "FordConnect Query (for EU/UK/NA) integration for Home Assistant"
 ISSUE_URL: Final = "https://github.com/marq24/ha-fordconnect-query/issues"
 
 CONFIG_VERSION: Final = 1
