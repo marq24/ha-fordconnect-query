@@ -62,8 +62,9 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
         _LOGGER.debug(f"async_oauth_create_entry() we can finally create the entry, since oAuth has returned a token")
         access_token = data.get(CONF_TOKEN, {}).get(CONF_ACCESS_TOKEN, None)
         if access_token is not None:
-            garage_data = await self.get_garage(async_create_clientsession(self.hass), access_token)
-
+            http_session = async_create_clientsession(self.hass)
+            garage_data = await self.get_garage(http_session, access_token)
+            http_session.detach()
             # data = {'vin': 'WF0TK3R7ABCD01234', 'vehicleType': '2023 Mustang Mach-E', 'color': 'GRABBER BLUE METALLIC',
             #         'modelName': 'Mustang Mach-E', 'modelCode': 'VLGW', 'modelYear': '2023', 'tcuEnabled': 1,
             #         'make': 'Ford', 'ngSdnManaged': 1, 'vehicleAuthorizationIndicator': 1, 'engineType': 'BEV'}
