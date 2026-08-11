@@ -118,6 +118,15 @@ class Tag(ApiKey, Enum):
                                  press_fn=FordpassDataHandler.messages_delete_last)
     MESSAGES_DELETE_ALL= ApiKey(key="msgdeleteall",
                                 press_fn=FordpassDataHandler.messages_delete_all)
+    TRAILER_LIGHT_CHECK_ON  = ApiKey(key="trailerLightCheckOn",
+                                     press_fn=FordpassDataHandler.trailer_light_check_enable)
+    TRAILER_LIGHT_CHECK_OFF = ApiKey(key="trailerLightCheckOff",
+                                     press_fn=FordpassDataHandler.trailer_light_check_disable)
+    # OPEN_WINDOWS            = ApiKey(key="openWindows",
+    #                                  press_fn=FordpassDataHandler.open_all_windows)
+    # CLOSE_WINDOWS           = ApiKey(key="closeWindows",
+    #                                  press_fn=FordpassDataHandler.close_all_windows)
+
     # LOCKS
     ##################################################
     DOOR_LOCK           = ApiKey(key="doorlock",
@@ -155,6 +164,10 @@ class Tag(ApiKey, Enum):
     DEPARTURE_TIMES     = ApiKey(key="departureTimes",
                                  state_fn=FordpassDataHandler.get_departure_times_state,
                                  on_off_fn=FordpassDataHandler.on_off_departure_times)
+
+    TRAILER_LIGHT_CHECK = ApiKey(key="trailerLightCheck",
+                                 state_fn=FordpassDataHandler.get_trailer_light_check_state,
+                                 on_off_fn=FordpassDataHandler.on_off_trailer_light_check)
 
     # SELECTS
     ZONE_LIGHTING       = ApiKey(key="zoneLighting",
@@ -315,10 +328,6 @@ class Tag(ApiKey, Enum):
 
     DEEPSLEEP_IN_PROGRESS   = ApiKey(key="deepSleepInProgress",
                                  state_fn=lambda data, prev_state: FordpassDataHandler.get_value_for_metrics_key(data, "deepSleepInProgress"))
-    FIRMWAREUPG_IN_PROGRESS = ApiKey(key="firmwareUpgInProgress",
-                                 state_fn=lambda data, prev_state: FordpassDataHandler.get_value_for_metrics_key(data, "firmwareUpgradeInProgress"),
-                                 attrs_fn=lambda data, units: FordpassDataHandler.get_metrics_dict(data, "firmwareUpgradeInProgress"))
-
 
     LAST_ENERGY_CONSUMED= ApiKey(key="lastEnergyConsumed",
                                  state_fn=FordpassDataHandler.get_last_energy_consumed_state,
@@ -331,6 +340,32 @@ class Tag(ApiKey, Enum):
     DEPARTURE_SCHEDULES = ApiKey(key="departureSchedules",
                                  state_fn=FordpassDataHandler.get_departure_schedules_state,
                                  attrs_fn=FordpassDataHandler.get_departure_schedules_attrs)
+
+    # currently not used!
+    FIRMWAREUPG_IN_PROGRESS = ApiKey(key="firmwareUpgInProgress",
+                                 state_fn=lambda data, prev_state: FordpassDataHandler.get_value_for_metrics_key(data, "firmwareUpgradeInProgress"),
+                                 attrs_fn=lambda data, units: FordpassDataHandler.get_metrics_dict(data, "firmwareUpgradeInProgress"))
+
+    FIRMWAREUPG_STATUS  = ApiKey(key="firmwareUpgStatus",
+                                state_fn=FordpassDataHandler.get_firmware_update_status_state,
+                                attrs_fn=FordpassDataHandler.get_firmware_update_status_attrs)
+
+    OTA_SCHEDULE        = ApiKey(key="otaSchedule",
+                                 state_fn=FordpassDataHandler.get_ota_schedule_state,
+                                 attrs_fn=FordpassDataHandler.get_ota_schedule_attrs)
+
+    LAST_FIRMWARE_UPDATE = ApiKey(key="lastFirmwareUpdate",
+                                 state_fn=FordpassDataHandler.get_last_firmware_update_state,
+                                 attrs_fn=FordpassDataHandler.get_last_firmware_update_attrs)
+
+    OTA_READINESS       = ApiKey(key="otaReadiness",
+                                 state_fn=FordpassDataHandler.get_ota_readiness_state,
+                                 attrs_fn=FordpassDataHandler.get_ota_readiness_attrs)
+
+    # state/attrs are not used - this tag is backed by a dedicated stateful sensor class
+    # (FordPassFirmwareUpdateHistorySensor) that accumulates completed updates across coordinator
+    # refreshes and persists them via RestoreEntity, since Ford does not expose a history list for this
+    FIRMWARE_UPDATE_HISTORY = ApiKey(key="firmwareUpdateHistory")
 
 
     # Debug Sensors (Disabled by default)
@@ -369,7 +404,7 @@ EV_ONLY_TAGS: Final = [
     Tag.EV_PAUSE,
     Tag.ELVEH_TARGET_CHARGE,
     Tag.ELVEH_TARGET_CHARGE_ALT1,
-    Tag.ELVEH_TARGET_CHARGE_ALT1,
+    Tag.ELVEH_TARGET_CHARGE_ALT2,
     Tag.LAST_ENERGY_CONSUMED,
     Tag.LAST_ENERGY_TRANSFER_LOG_ENTRY
 ]
@@ -426,6 +461,7 @@ SENSORS = [
         tag=Tag.FUEL,
         key=Tag.FUEL.key,
         icon="mdi:gas-station",
+        state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
         has_entity_name=True,
     ),
@@ -443,6 +479,7 @@ SENSORS = [
         tag=Tag.OIL,
         key=Tag.OIL.key,
         icon="mdi:oil",
+        state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
         has_entity_name=True,
     ),

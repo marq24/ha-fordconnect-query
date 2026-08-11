@@ -1,7 +1,7 @@
 {
 	"name": "FordConnect Query (for EU/UK/North America)",
 	"content_in_root": false,
-    "homeassistant": "2025.10.0",
+    "homeassistant": "2026.7.0",
     "hacs": "1.18.0",
     "render_readme": true
 }

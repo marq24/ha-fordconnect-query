@@ -46,9 +46,9 @@ RCC_SEAT_OPTIONS_FULL: Final = ["off", "heated1", "heated2", "heated3", "cooled1
 RCC_SEAT_OPTIONS_HEAT_ONLY: Final = ["off", "heated1", "heated2", "heated3"]
 
 RCC_TEMPERATURES_CELSIUS:    Final = ["lo",
-                                      "16", "16_5", "17", "17_5", "18", "18_5", "19", "19_5", "20", "20_5",
-                                      "21", "21_5", "22", "22_5", "23", "23_5", "24", "24_5", "25", "25_5",
-                                      "26", "26_5", "27", "27_5", "28", "28_5", "29", "30",
+                                      "16_0", "16_5", "17_0", "17_5", "18_0", "18_5", "19_0", "19_5", "20_0", "20_5",
+                                      "21_0", "21_5", "22_0", "22_5", "23_0", "23_5", "24_0", "24_5", "25_0", "25_5",
+                                      "26_0", "26_5", "27_0", "27_5", "28_0", "28_5", "29_0", "29_5", "30_0",
                                       "hi"]
 
 ELVEH_TARGET_CHARGE_OPTIONS: Final = ["50", "60", "70", "80", "85", "90", "95", "100"]
@@ -99,4 +99,34 @@ DAYS_MAP = {
     "FRIDAY":   4,
     "SATURDAY": 5,
     "SUNDAY":   6,
+}
+
+# raw Ford states.deployment.value.toState -> small, stable user-facing enum.
+# anything not listed here falls back to "unknown" rather than raising, since Ford's backend has
+# added new intermediate states before without warning
+OTA_DEPLOYMENT_STATE_MAP: Final = {
+    "requested":                       "idle",
+    "request_delivery_queued":         "downloading",
+    "artifact_retrieval_queued":       "downloading",
+    "artifact_retrieval_in_progress":  "downloading",
+    "deploying":                       "installing",
+    "installation_queued":             "installing",
+    "success":                         "installed",
+    "failed":                          "failed",
+    "error":                           "failed",
+    "cancelled":                       "idle",
+}
+
+# raw Ford states.executePendingUpdates.value.toState -> small enum (this only confirms the vehicle
+# *received* the "install now" instruction, not that the update itself finished - that's tracked
+# separately via OTA_DEPLOYMENT_STATE_MAP)
+OTA_TRIGGER_STATE_MAP: Final = {
+    "requested":                                "requested",
+    "request_delivery_queued":                  "requested",
+    "oem_cloud_delivery_in_progress":            "sending",
+    "oem_cloud_translation_in_progress":         "sending",
+    "oem_cloud_to_device_delivery_in_progress":  "sending",
+    "request_queued":                            "sending",
+    "success":                                   "acknowledged",
+    "failed":                                     "failed",
 }
