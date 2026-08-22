@@ -1,6 +1,6 @@
 {
   "domain": "fordconnect_query",
-  "name": "FordConnect Query (for EU)",
+  "name": "FordConnect Query (for EU/UK/North America)",
   "codeowners": ["@marq24"],
   "config_flow": true,
   "dependencies": ["application_credentials", "http"],
