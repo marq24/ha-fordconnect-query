@@ -288,6 +288,9 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
 
         self._a_task = None
 
+        # for diagnostic purposes...
+        self.api_response_data: dict = {}
+
         # moved from 1'st line to bottom...
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=update_interval_as_int), config_entry=config_entry)
 
@@ -547,15 +550,32 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
             response_data = await res.json()
             if response_data is not None:
                 _LOGGER.debug(f"{self.vli}request_{logging_type}(): {len(response_data)} - {response_data.keys() if response_data is not None else 'None'}")
+
+                # logging the request/response data for diagnosis...
+                if logging_type not in self.api_response_data:
+                    self.api_response_data[logging_type] = []
+
+                data_list: list = self.api_response_data.get(logging_type)
+                if len(data_list) > 5:
+                    data_list.pop(0)
+
+                req_txt = f"{res.request_info.url}" if res is not None and hasattr(res, "request_info") else "UNKNOWN"
+                if self._vin in req_txt:
+                    req_txt = req_txt.replace(self._vin, "[**REDACTED**]")
+
+                data_list.append({"ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                  "request": req_txt,
+                                  "response": response_data})
+
+                # dumping the response to the filesystem...
+                if self._log_to_filesystem:
+                    try:
+                        await asyncio.get_running_loop().run_in_executor(None, lambda: self.__dump_data(logging_type, response_data))
+                    except BaseException as exc:
+                        _LOGGER.debug(f"{self.vli}Error while dumping {logging_type} data to file: {type(exc).__name__} - {exc}")
+
             else:
                 _LOGGER.debug(f"{self.vli}request_{logging_type}(): No data received!")
-
-            # dumping?
-            if self._log_to_filesystem and response_data is not None:
-                try:
-                    await asyncio.get_running_loop().run_in_executor(None, lambda: self.__dump_data(logging_type, response_data))
-                except BaseException as exc:
-                    _LOGGER.debug(f"{self.vli}Error while dumping {logging_type} data to file: {type(exc).__name__} - {exc}")
 
             return response_data
 
