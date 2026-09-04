@@ -71,8 +71,22 @@ class FordpassDataHandler:
 
     @staticmethod
     def get_vehicles(data):
-        """Get the "vehicles" dictionary."""
-        return data.get(ROOT_VEHICLES, {})
+        """Get the "vehicles" list."""
+        return data.get(ROOT_VEHICLES, [])
+
+    @staticmethod
+    def get_vehicle(data):
+        """Get the single vehicle-profile."""
+        a_vin = data.get("vin", None)
+        if a_vin is None or len(str(a_vin)) == 0:
+            return {}
+
+        a_vin = str(a_vin)
+        for a_veh in data.get(ROOT_VEHICLES, []):
+            if isinstance(a_veh, dict):
+                if a_vin == str(a_veh.get("vin", "vin-unknown")):
+                    return a_veh
+        return {}
 
     @staticmethod
     def get_metrics(data):
@@ -224,13 +238,13 @@ class FordpassDataHandler:
         attrs = {}
         data_metrics = FordpassDataHandler.get_metrics(data)
         if "batteryVoltage" in data_metrics:
-            if data_metrics["batteryVoltage"].get("vehicleBattery", UNDEFINED).lower() == "primary_battery":
+            if str(data_metrics["batteryVoltage"].get("vehicleBattery", UNDEFINED)).lower() == "primary_battery":
                 attrs["batteryVoltage"] = FordpassDataHandler.get_value_for_metrics_key(data, "batteryVoltage")
             else:
                 attrs["batteryVoltageObject"] = data_metrics.get("batteryVoltage", 0)
 
         if "batteryLoadStatus" in data_metrics:
-            if data_metrics["batteryLoadStatus"].get("vehicleBattery", UNDEFINED).lower() == "primary_battery":
+            if str(data_metrics["batteryLoadStatus"].get("vehicleBattery", UNDEFINED)).lower() == "primary_battery":
                 attrs["batteryLoadStatus"] = FordpassDataHandler.get_value_for_metrics_key(data, "batteryLoadStatus")
             else:
                 attrs["batteryLoadStatusObject"] = data_metrics.get("batteryLoadStatus", UNSUPPORTED)
@@ -295,7 +309,11 @@ class FordpassDataHandler:
         return FordpassDataHandler.get_metrics(data).get("position", {}).get("value", {}).get("location", {})
 
     def get_gps_attrs(data, units:UnitSystem):
-        attrs = FordpassDataHandler.get_metrics_dict(data, "position")
+        pos_data = FordpassDataHandler.get_metrics_dict(data, "position")
+        if pos_data is None or not isinstance(pos_data, dict):
+            return None
+        # we just make 100% sure that pos_data is a copied dict...
+        attrs = dict(pos_data)
         data_metrics = FordpassDataHandler.get_metrics(data)
         if "compassDirection" in data_metrics:
             attrs["compassDirection"] = data_metrics.get("compassDirection", {}).get("value", UNSUPPORTED)
@@ -329,7 +347,11 @@ class FordpassDataHandler:
 
     # ALARM attributes
     def get_alarm_attrs(data, units:UnitSystem):
-        attrs = FordpassDataHandler.get_metrics_dict(data, "alarmStatus")
+        alarm_data = FordpassDataHandler.get_metrics_dict(data, "alarmStatus")
+        if alarm_data is None or not isinstance(alarm_data, dict):
+            return None
+        # make sure that alarm_data is a copied dict...
+        attrs = dict(alarm_data)
         data_metrics = FordpassDataHandler.get_metrics(data)
         if "panicAlarmStatus" in data_metrics:
             val = data_metrics.get("panicAlarmStatus", {}).get("value", UNSUPPORTED)
@@ -476,14 +498,14 @@ class FordpassDataHandler:
         attrs = {}
         for a_door in data_metrics.get("doorLockStatus", []):
             if "vehicleSide" in a_door:
-                if "vehicleDoor" in a_door and a_door['vehicleDoor'].upper() == "UNSPECIFIED_FRONT":
-                    attrs[FordpassDataHandler.to_camel(a_door['vehicleSide']+" FRONT")] = a_door['value']
-                elif "vehicleDoor" in a_door and a_door['vehicleDoor'].upper() == "UNSPECIFIED_REAR":
-                    attrs[FordpassDataHandler.to_camel(a_door['vehicleSide']+" REAR")] = a_door['value']
+                if "vehicleDoor" in a_door and str(a_door['vehicleDoor']).upper() == "UNSPECIFIED_FRONT":
+                    attrs[FordpassDataHandler.to_camel(f"{a_door['vehicleSide']} FRONT")] = a_door['value']
+                elif "vehicleDoor" in a_door and str(a_door['vehicleDoor']).upper() == "UNSPECIFIED_REAR":
+                    attrs[FordpassDataHandler.to_camel(f"{a_door['vehicleSide']} REAR")] = a_door['value']
                 else:
-                    attrs[FordpassDataHandler.to_camel(a_door['vehicleDoor'])] = a_door['value']
+                    attrs[FordpassDataHandler.to_camel(str(a_door['vehicleDoor']))] = a_door['value']
             else:
-                attrs[FordpassDataHandler.to_camel(a_door["vehicleDoor"])] = a_door['value']
+                attrs[FordpassDataHandler.to_camel(str(a_door["vehicleDoor"]))] = a_door['value']
         return attrs
 
 
@@ -503,14 +525,14 @@ class FordpassDataHandler:
         attrs = {}
         for a_door in data_metrics.get("doorStatus", []):
             if "vehicleSide" in a_door:
-                if "vehicleDoor" in a_door and a_door['vehicleDoor'].upper() == "UNSPECIFIED_FRONT":
-                    attrs[FordpassDataHandler.to_camel(a_door['vehicleSide']+" FRONT")] = a_door['value']
-                elif "vehicleDoor" in a_door and a_door['vehicleDoor'].upper() == "UNSPECIFIED_REAR":
-                    attrs[FordpassDataHandler.to_camel(a_door['vehicleSide']+" REAR")] = a_door['value']
+                if "vehicleDoor" in a_door and str(a_door['vehicleDoor']).upper() == "UNSPECIFIED_FRONT":
+                    attrs[FordpassDataHandler.to_camel(f"{a_door['vehicleSide']} FRONT")] = a_door['value']
+                elif "vehicleDoor" in a_door and str(a_door['vehicleDoor']).upper() == "UNSPECIFIED_REAR":
+                    attrs[FordpassDataHandler.to_camel(f"{a_door['vehicleSide']} REAR")] = a_door['value']
                 else:
-                    attrs[FordpassDataHandler.to_camel(a_door['vehicleDoor'])] = a_door['value']
+                    attrs[FordpassDataHandler.to_camel(str(a_door['vehicleDoor']))] = a_door['value']
             else:
-                attrs[FordpassDataHandler.to_camel(a_door["vehicleDoor"])] = a_door['value']
+                attrs[FordpassDataHandler.to_camel(str(a_door["vehicleDoor"]))] = a_door['value']
 
         if "hoodStatus" in data_metrics and "value" in data_metrics["hoodStatus"]:
             attrs["hood"] = data_metrics["hoodStatus"]["value"]
@@ -795,22 +817,43 @@ class FordpassDataHandler:
                 return await vehicle.pause_charge()
 
     def _get_eleveh_charging_power_from_metrics(data_metrics):
-        if "xevBatteryChargerVoltageOutput" in data_metrics and "xevBatteryChargerCurrentOutput" in data_metrics:
-            ch_volt = float(data_metrics.get("xevBatteryChargerVoltageOutput", {}).get("value", 0))
-            ch_amps = float(data_metrics.get("xevBatteryChargerCurrentOutput", {}).get("value", 0))
-            if isinstance(ch_volt, Number) and ch_volt != 0 and isinstance(ch_amps, Number) and ch_amps != 0:
-                return round((ch_volt * ch_amps) / 1000, 2)
-            elif isinstance(ch_volt, Number) and ch_volt != 0 and "xevBatteryIoCurrent" in data_metrics:
-                # Get Battery Io Current for DC Charging calculation
-                batt_amps = float(data_metrics.get("xevBatteryIoCurrent", {}).get("value", 0))
-                # DC Charging calculation: Use absolute value for amperage to handle negative values
-                if isinstance(batt_amps, Number) and batt_amps != 0:
-                    return round((ch_volt * abs(batt_amps)) / 1000, 2)
-                else:
-                    return 0
-            else:
-                return 0
-        return None
+        def parse_metric_int(key):
+            """Extracts (float_value, datetime) or (0.0, None) if missing/invalid."""
+            if key not in data_metrics:
+                return 0.0, None
+
+            a_data_obj = data_metrics[key]
+            val = float(a_data_obj.get("value", 0))
+            try:
+                dt = datetime.fromisoformat(a_data_obj.get("updateTime", "1970-01-01T00:00:00Z"))
+            except BaseException:
+                dt = None
+            return val, dt
+
+        # 1. Parse voltage
+        volt, _ = parse_metric_int("xevBatteryChargerVoltageOutput")
+        if not isinstance(volt, Number) or volt == 0:
+            return 0 if "xevBatteryChargerVoltageOutput" in data_metrics else None
+
+        # 2. Parse charger and battery current metrics
+        ch_amps, ch_dt = parse_metric_int("xevBatteryChargerCurrentOutput")
+        batt_amps, batt_dt = parse_metric_int("xevBatteryIoCurrent")
+
+        # 3. Determine amperage based on the newer timestamps
+        if ch_dt and batt_dt:
+            amps_to_use_for_calc = ch_amps if ch_dt > batt_dt else abs(batt_amps)
+        elif ch_dt:
+            amps_to_use_for_calc = ch_amps
+        elif batt_dt:
+            amps_to_use_for_calc = abs(batt_amps)
+        else:
+            amps_to_use_for_calc = 0
+
+        # 4. Calculate power (kW)
+        if isinstance(amps_to_use_for_calc, Number) and amps_to_use_for_calc != 0:
+            return round((volt * amps_to_use_for_calc) / 1000, 2)
+
+        return 0
 
     def get_elveh_charging_attrs(data, units:UnitSystem):
         data_metrics = FordpassDataHandler.get_metrics(data)
@@ -1290,9 +1333,15 @@ class FordpassDataHandler:
 
     def get_energy_transfer_log_attrs(data, units:UnitSystem):
         log_list = FordpassDataHandler.get_energy_transfer_logs_list(data)
+        if not isinstance(log_list, list) or not log_list:
+            return None
+
         attrs = {}
         if len(log_list) > 0:
             energy_transfer_log_list_entry = log_list[0]
+            if not isinstance(energy_transfer_log_list_entry, dict):
+                return None
+
             attrs = energy_transfer_log_list_entry.copy()
             attrs.pop("id")
             attrs.pop("deviceId")
@@ -2063,11 +2112,14 @@ class FordpassDataHandler:
     # BUTTON actions
     ##################
     async def reload_data(coordinator, vehicle):
-        await coordinator.async_request_refresh_force_classic_requests()
+        await coordinator.force_async_update_now()
 
     async def request_update_and_reload(coordinator, vehicle):
         await vehicle.request_update()
-        await coordinator.async_request_refresh_force_classic_requests()
+        # when we send a UPDATE request to the vehicle, THEN all new data is already
+        # provided via the command_handler! - no need to FORCE a manual update
+        # afterward!
+        #await coordinator.force_async_update_now()
 
     async def lock_vehicle(coordinator, vehicle):
         await vehicle.lock()
