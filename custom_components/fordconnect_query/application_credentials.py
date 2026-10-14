@@ -1,5 +1,9 @@
+import datetime
 import logging
 import secrets
+import time
+import jwt
+
 from typing import Final
 
 from aiohttp import ClientError
@@ -11,6 +15,7 @@ from homeassistant.components.application_credentials import (
     AuthImplementation,
     ClientCredential,
 )
+from homeassistant.exceptions import OAuth2TokenRequestReauthError
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.config_entry_oauth2_flow import (
     LocalOAuth2Implementation,
@@ -64,6 +69,43 @@ class FordConQOAuth2Implementation(LocalOAuth2Implementation):
         except ClientError as err:
             _LOGGER.error(f"async_resolve_external_data(): failed to get token: {err}")
             return {}
+
+    async def _async_refresh_token(self, token: dict) -> dict:
+        """Refresh the token and inspect the id_token if present."""
+        _LOGGER.debug(f"_async_refresh_token(): called...")
+
+        # Call the parent refresh method to fetch the new token payload from the server
+        new_token = await super()._async_refresh_token(token)
+
+        # Check if an id_token was returned in the refresh response
+        if id_token := new_token.get("id_token"):
+            try:
+                # Decode the JWT payload without signature verification
+                # (or with verification if you have the public keys configured)
+                payload = jwt.decode(id_token, options={"verify_signature": False})
+
+                # Locate the auth_time claim (Unix timestamp in seconds)
+                if auth_time := payload.get("auth_time"):
+                    auth_date = datetime.datetime.fromtimestamp(auth_time)
+                    expire_date = datetime.datetime.fromtimestamp(auth_time + 31536000)
+                    _LOGGER.debug(f"_async_refresh_token(): decoded the id_token successfully. Initial authentication date: {auth_date.strftime("%Y-%m-%dT%H:%M:%SZ")} | will expire: {expire_date.strftime("%Y-%m-%dT%H:%M:%SZ")}")
+                    # 1 YEAR     - 1 WEEK
+                    # 31,536,000 - 604,800 = 30,931,200
+                    if time.monotonic() >  + auth_time + 30931200:
+                        _LOGGER.info(f"_async_refresh_token(): we must invalidate current token!")
+                        _LOGGER.warning(f"FordConnect Query requires RE-AUTH via the User via a fresh login @ Ford Website [AuthTime will/has expired @ {expire_date.strftime("%Y-%m-%dT%H:%M:%SZ")}]")
+                        # This tells Home Assistant to trigger the reauth flow
+                        raise OAuth2TokenRequestReauthError("Authentication session expired (stale auth_time)")
+
+            except OAuth2TokenRequestReauthError:
+                # Re-raise the reauth error so Home Assistant captures it properly
+                raise
+
+            except Exception as err:
+                _LOGGER.error(f"_async_refresh_token(): Failed to decode id_token from refresh response: {type(err).__name__} - {err}")
+
+        _LOGGER.debug(f"_async_refresh_token(): completed")
+        return new_token
 
 # To make the standard /auth/external/callback work with our short state,
 # we wrap the decoder.
