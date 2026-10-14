@@ -616,6 +616,10 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
         except BaseException as e:
             _LOGGER.info(f"{self.vli}__dump_data(): Error while writing data to file '{filename}' - {type(e).__name__} - {e}")
 
+    def last_data_update_not_older_then_30_minutes(self):
+        return time.monotonic() - self._last_update_time < 60 * 30
+
+
 class FordPassEntity(CustomFriendlyNameEntity):
     """Defines a base FordPass entity."""
     _attr_has_entity_name = True
@@ -717,3 +721,8 @@ class FordPassEntity(CustomFriendlyNameEntity):
             _LOGGER.debug(f"Error retrieving icon for {self._tag.key}: {exc}")
 
         return super().icon
+
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return self.coordinator.data is not None and len(self.coordinator.data) > 0 and self.coordinator.last_data_update_not_older_then_30_minutes()
