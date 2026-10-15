@@ -291,6 +291,9 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
         # for diagnostic purposes...
         self.api_response_data: dict = {}
 
+        # either 30minutes (or when update-interval is quite large) 5 times the update_interval
+        self.max_age_of_last_update  = max(60 * 30, update_interval_as_int * 5)
+
         # moved from 1'st line to bottom...
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=update_interval_as_int), config_entry=config_entry)
 
@@ -617,7 +620,7 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
             _LOGGER.info(f"{self.vli}__dump_data(): Error while writing data to file '{filename}' - {type(e).__name__} - {e}")
 
     def last_data_update_not_older_then_30_minutes(self):
-        return time.monotonic() - self._last_update_time < 60 * 30
+        return time.monotonic() - self._last_update_time < self.max_age_of_last_update
 
 
 class FordPassEntity(CustomFriendlyNameEntity):
