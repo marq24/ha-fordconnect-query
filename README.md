@@ -1,4 +1,4 @@
-# FordConnect Query Home Assistant Integration 2026 (EV/PHEV/Petrol/Diesel)
+# <sub><img src="https://raw.githubusercontent.com/marq24/ha-fordconnect-query/main/custom_components/fordconnect_query/brand/icon.png" style="align:bottom;height:42px;"></sub> FordConnect Query Home Assistant Integration 2026 (EV/PHEV/Petrol/Diesel)
 ## Supporting all Ford vehicles with FordPass™ connectivity
 <!--
 ## Welcome to the FordConnect Query Integration
