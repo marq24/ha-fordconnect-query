@@ -1,7 +1,9 @@
 {
-	"name": "FordConnect Query (for EU/UK/North America)",
-	"content_in_root": false,
-    "homeassistant": "2026.7.0",
-    "hacs": "1.18.0",
-    "render_readme": true
+  "name": "FordConnect Query (for EU/UK/North America)",
+  "zip_release": true,
+  "filename": "fordconnect_query.zip",
+  "content_in_root": false,
+  "homeassistant": "2026.7.0",
+  "hacs": "1.18.0",
+  "render_readme": true
 }
