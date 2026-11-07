@@ -3,15 +3,16 @@ from numbers import Number
 from typing import Any
 
 import aiohttp
-import voluptuous as vol
+import probatio
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlow
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_TOKEN, CONF_SCAN_INTERVAL, CONF_USERNAME
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_TOKEN, CONF_SCAN_INTERVAL, CONF_USERNAME, UnitOfTime
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import config_entry_oauth2_flow
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from homeassistant.helpers import selector
 from .const import (
     DOMAIN,
     CONFIG_VERSION,
@@ -110,7 +111,7 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
         except BaseException as e:
             _LOGGER.error(f"get_garage(): caused {type(e).__name__} {e}")
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(self, user_input=None) -> ConfigFlowResult:
         return await self.async_step_user_connect()
 
     async def async_step_user_connect(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
@@ -125,9 +126,12 @@ class FordConQConfigFlow(config_entry_oauth2_flow.AbstractOAuth2FlowHandler, dom
 
         return self.async_show_form(
             step_id="user_connect",
-            data_schema=vol.Schema({
-                vol.Required(CONF_TITLE, default="FordConnect Query"): str,
-            }),
+            data_schema=self.add_suggested_values_to_schema(probatio.Schema({
+                    probatio.Required(CONF_TITLE):
+                        selector.TextSelector()
+                }),
+                {CONF_TITLE: "FordConnect Query"},
+            ),
             description_placeholders={
                 "repo": "https://github.com/marq24/ha-fordconnect-query",
                 "github": "https://github.com/marq24",
@@ -176,7 +180,26 @@ class FordConQOptionsFlowHandler(OptionsFlow):
                 user_input[CONF_SCAN_INTERVAL] = max(int(user_input[CONF_SCAN_INTERVAL]), MIN_SCAN_INTERVAL)
             return self.async_create_entry(title="", data=user_input)
 
-        options = {vol.Optional(CONF_PRESSURE_UNIT, default=self._options.get(CONF_PRESSURE_UNIT, DEFAULT_PRESSURE_UNIT),): vol.In(PRESSURE_UNITS),
-                   vol.Optional(CONF_LOG_TO_FILESYSTEM, default=self._options.get(CONF_LOG_TO_FILESYSTEM, False),): bool,
-                   vol.Optional(CONF_SCAN_INTERVAL, default=self._options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL), ): int}
-        return self.async_show_form(step_id="init", data_schema=vol.Schema(options), description_placeholders={"integration_name": "fordconnect_query"})
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(probatio.Schema({
+                probatio.Optional(CONF_PRESSURE_UNIT):
+                    selector.SelectSelector(selector.SelectSelectorConfig(
+                        options=PRESSURE_UNITS,
+                        mode=selector.SelectSelectorMode.DROPDOWN)),
+                probatio.Optional(CONF_LOG_TO_FILESYSTEM):
+                    selector.BooleanSelector(),
+                probatio.Optional(CONF_SCAN_INTERVAL):
+                    selector.NumberSelector(selector.NumberSelectorConfig(
+                        step=1,
+                        min=1,
+                        unit_of_measurement=UnitOfTime.SECONDS,
+                        mode=selector.NumberSelectorMode.BOX)),
+            }),
+            {
+                CONF_PRESSURE_UNIT: self._options.get(CONF_PRESSURE_UNIT, DEFAULT_PRESSURE_UNIT),
+                CONF_LOG_TO_FILESYSTEM: self._options.get(CONF_LOG_TO_FILESYSTEM, False),
+                CONF_SCAN_INTERVAL: self._options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
+            }),
+            description_placeholders={"integration_name": "fordconnect_query"},
+        )
