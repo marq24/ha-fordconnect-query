@@ -8,8 +8,6 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any, Final
 
-import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfPressure, CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
@@ -61,7 +59,6 @@ from .fordpass_handler import (
 
 _LOGGER = logging.getLogger(__name__)
 
-CONFIG_SCHEMA:Final = vol.Schema({DOMAIN: vol.Schema({})}, extra=vol.ALLOW_EXTRA)
 PLATFORMS:Final = [Platform.SENSOR, Platform.DEVICE_TRACKER]
 LAST_TOKEN_KEY:Final = "last_token"
 DATA_STORAGE_KEY:Final = "temp_data_storage"
