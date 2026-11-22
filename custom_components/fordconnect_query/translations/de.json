@@ -39,6 +39,14 @@
                 "lincoln": "Lincoln Fahrzeuge - The Lincoln Way™ App"
             }
         },
+        "precondition_temperature": {
+            "options": {
+                "low": "Kühl",
+                "medium": "Mittel",
+                "high": "Warm",
+                "off": "Aus"
+            }
+        },
         "schedule_days": {
             "options": {
                 "monday": "01 Montag",
@@ -48,14 +56,6 @@
                 "friday": "05 Freitag",
                 "saturday": "06 Samstag",
                 "sunday": "07 Sonntag"
-            }
-        },
-        "precondition_temperature": {
-            "options": {
-                "low": "Kühl",
-                "medium": "Mittel",
-                "high": "Warm",
-                "off": "Aus"
             }
         }
     },
@@ -179,12 +179,14 @@
                     "pressure_unit": "Maßeinheit für Druck",
                     "scan_interval": "Aktualisierungsintervall der Ford-API Requests (Sekunden)",
                     "update_interval": "Aktualisierungsintervall der Ford-API Requests (Sekunden)",
+                    "skip_data_existance_check": "Keine Datenexistenzprüfung (fügt alle Entitäten hinzu)",
                     "force_remote_climate_control": "Die Optionen der Klima Fernsteuerung (❄|☀) [RemoteControl] sollen immer verfügbar sein",
                     "log_to_filesystem": "Protokolliere API-Antworten im lokalen HA Dateisystem"
                 },
                 "data_description": {
                     "update_interval": "Das kleinste Interval sind 30 Sekunden",
                     "scan_interval": "Das kleinste Interval sind 30 Sekunden",
+                    "skip_data_existance_check": "Standardmäßig (mit wenigen Ausnahmen) fügt die Integration nur dann Entitäten hinzu, wenn die zugrunde liegende Datenquelle in der ersten Antwort des Backends gefunden werden kann.",
                     "force_remote_climate_control": "Wenn Du diese Option aktivierst, werden die von Ford vorgegebenen Einstellungen ignoriert.",
                     "log_to_filesystem": "Diese Option sollte nicht über einen längeren Zeitraum aktiviert sein!\rDu findest die Dateien unter: './storage/{integration_name}/data_dumps'"
                 },
@@ -195,13 +197,7 @@
     "services": {
         "refresh_status": {
             "name": "Fahrzeugstatus aktualisieren",
-            "description": "Aktualisiert den Status und die Entitäten des Fahrzeugs. Der Vorgang kann bis zu 5 Minuten dauern.",
-            "fields": {
-                "vin": {
-                    "name": "FIN",
-                    "description": "Wenn angegeben, aktualisiert nur den Status des Fahrzeugs mit dieser FIN. Ansonsten wird den Status aller Fahrzeuge aktualisiert."
-                }
-            }
+            "description": "Aktualisiert den Status und die Entitäten des Fahrzeugs. Der Vorgang kann bis zu 5 Minuten dauern."
         },
         "clear_tokens": {
             "name": "Token-Cache leeren",
@@ -271,8 +267,8 @@
         "button": {
             "update_data":          {"name": "Lokaler Sync"},
             "request_refresh":      {"name": "Remote Sync"},
-            "doorlock":             {"name": "Verriegeln"},
-            "doorunlock":           {"name": "Entriegeln"},
+            "doorlock":             {"name": "Türen verriegeln"},
+            "doorunlock":           {"name": "Türen entriegeln"},
             "evstart":              {"name": "EV Laden starten"},
             "evcancel":             {"name": "EV Laden fortfahren"},
             "evpause":              {"name": "EV Laden pausieren"},
@@ -283,9 +279,12 @@
             "msgdeleteall":         {"name": "Nachrichten: Alle Löschen"},
             "msgdeletelast":        {"name": "Nachrichten: Letzte Löschen"},
             "trailerlightcheckon":  {"name": "Trailer Light Check: EIN"},
-            "trailerlightcheckoff": {"name": "Trailer Light Check: AUS"}
+            "trailerlightcheckoff": {"name": "Trailer Light Check: AUS"},
+            "openwindows":          {"name": "Alle Fenster öffnen"},
+            "closewindows":         {"name": "Alle Fenster schließen"}
         },
         "device_tracker":   {"tracker": {"name": "Fahrzeug Tracker"}},
+        "image":            {"vehicleimage":  {"name":  "Fahrzeug Abbildung"}},
         "lock":             {"doorlock":{"name": "Verriegelung"}},
         "switch": {
             "ignition":                 {"name": "RC (❄|☀): Start [RemoteControl]"},
@@ -307,19 +306,21 @@
         "sensor": {
             "odometer":                 {"name": "Kilometerstand"},
             "fuel":                     {"name": "Tankanzeige"},
+            "fuelrange":                {"name": "Reichweite (verbleibend)"},
             "battery":                  {"name": "Batterie (12V)"},
             "oil":                      {"name": "Öl Qualität"},
-            "tirepressure":             {"name": "Reifendruck"},
+            "tirepressure":             {"name": "Reifendruck-Kontrollsystem & Drücke"},
             "gps":                      {"name": "GPS JSON"},
             "alarm":                    {"name": "Alarmanlage"},
-            "ignitionstatus":           {"name": "Status Zündung"},
-            "doorstatus":               {"name": "Status Türen"},
+            "ignitionstatus":           {"name": "Zündung"},
+            "doorstatus":               {"name": "Türen"},
             "windowposition":           {"name": "Fenster Positionen"},
             "lastrefresh":              {"name": "letzte Aktualisierung"},
             "elveh":                    {"name": "EV Daten"},
             "elvehplug":                {"name": "EV Steckerstatus"},
             "elvehcharging":            {"name": "EV Ladestatus"},
             "elvehchargingpower":       {"name": "EV geladen"},
+            "elvehrecuppower":          {"name": "EV Rekuperation"},
             "speed":                    {"name": "Geschwindigkeit"},
             "enginespeed":              {"name": "Motordrehzahl"},
             "gearleverposition":        {"name": "Gang"},
@@ -328,37 +329,40 @@
             "outsidetemp":              {"name": "Temperatur Außen"},
             "engineoiltemp":            {"name": "Temperatur Motoröl"},
             "deepsleep":                {"name": "Tiefschlaf"},
-            "firmwareupginprogress":    {"name": "Firmware Update wird durchfeführt"},
-            "remotestartstatus":        {"name": "RC (❄|☀): Status Fernstart"},
+            "firmwareupginprogress":    {"name": "Firmware Update Status"},
+            "firmwareupgstatus":        {"name": "Firmware Update Status"},
+            "remotestartstatus":        {"name": "RC (❄|☀): Fernstart"},
             "zonelighting":             {"name": "Zonenbeleuchtung"},
             "messages":                 {"name": "Nachrichten"},
-            "dieselsystemstatus":       {"name": "Status Diesel System"},
+            "dieselsystemstatus":       {"name": "Diesel System"},
             "exhaustfluidlevel":        {"name": "AdBlue-Stand"},
             "events":                   {"name": "Ereignisse"},
             "metrics":                  {"name": "Metriken"},
             "states":                   {"name": "Status"},
             "vehicles":                 {"name": "Fahrzeuge"},
-
             "soc":                      {"name": "Ladestand"},
             "evccstatus":               {"name": "EVCC Status-Code"},
-            "seatbelt":                 {"name": "Gurt-Status"},
+            "seatbelt":                 {"name": "Sicherheitsgurte"},
             "deviceconnectivity":       {"name": "Verbindung"},
-
             "yawrate":                  {"name": "Gier und Neigung"},
             "acceleration":             {"name": "Beschleunigung"},
-            "brakepedalstatus":         {"name": "Status Bremspedal"},
+            "brakepedalstatus":         {"name": "Bremspedal"},
             "braketorque":              {"name": "Bremsmoment"},
             "acceleratorpedalposition": {"name": "Gaspedalstellung"},
-            "parkingbrakestatus":       {"name": "Status Feststellbremse"},
+            "parkingbrakestatus":       {"name": "Feststellbremse"},
             "torqueattransmission":     {"name": "Drehmoment am Getriebe"},
-            "wheeltorquestatus":        {"name": "Status Drehmoment am Rad"},
+            "wheeltorquestatus":        {"name": "Drehmoment am Rad"},
             "cabintemperature":         {"name": "Innenraumtemperatur"},
             "lastenergyconsumed":       {"name": "EV Energieverbrauch (letzte Fahrt)"},
             "energytransferlogentry":   {"name": "EV Letzter Ladevorgang"},
             "remotestartcountdown":     {"name": "RC (❄|☀): Verbleibende Zeit"},
-            "doorlock":                 {"name": "Status Verriegelung"},
+            "doorlock":                 {"name": "Verriegelung"},
 
-            "departureschedules":       {"name": "Nächste Abfahrtszeit"}
+            "departureschedules":       {"name": "Nächste Abfahrtszeit"},
+            "otaschedule":              {"name": "Nächste OTA-Prüfung"},
+            "lastfirmwareupdate":       {"name": "Letztes Firmware-Update"},
+            "firmwareupdatehistory":    {"name": "Firmware-Update-Verlauf"},
+            "otareadiness":             {"name": "Update-Bereitschaft"}
         },
         "select": {
             "zonelighting": {
@@ -371,22 +375,6 @@
                     "4": "Beifahrerseite",
                     "off": "AUS"
                 }
-            },
-            "rccseatrearleft": {
-                "name": "RC (❄|☀): Sitz hinten links [RemoteControl]",
-                "state": { "off": "aus", "cooled1": "Kühlen Stufe I", "cooled2": "Kühlen Stufe II", "cooled3": "Kühlen Stufe III", "heated1": "Heizen Stufe I", "heated2": "Heizen Stufe II", "heated3": "Heizen Stufe III"}
-            },
-            "rccseatrearright": {
-                "name": "RC (❄|☀): Sitz hinten rechts [RemoteControl]",
-                "state": { "off": "aus", "cooled1": "Kühlen Stufe I", "cooled2": "Kühlen Stufe II", "cooled3": "Kühlen Stufe III", "heated1": "Heizen Stufe I", "heated2": "Heizen Stufe II", "heated3": "Heizen Stufe III"}
-            },
-            "rccseatfrontleft": {
-                "name": "RC (❄|☀): Sitz vorne links [RemoteControl]",
-                "state": { "off": "aus", "cooled1": "Kühlen Stufe I", "cooled2": "Kühlen Stufe II", "cooled3": "Kühlen Stufe III", "heated1": "Heizen Stufe I", "heated2": "Heizen Stufe II", "heated3": "Heizen Stufe III"}
-            },
-            "rccseatfrontright": {
-                "name": "RC (❄|☀): Sitz vorne rechts [RemoteControl]",
-                "state": { "off": "aus", "cooled1": "Kühlen Stufe I", "cooled2": "Kühlen Stufe II", "cooled3": "Kühlen Stufe III", "heated1": "Heizen Stufe I", "heated2": "Heizen Stufe II", "heated3": "Heizen Stufe III"}
             },
             "rcctemperature": {
                 "name": "RC (❄|☀): Temperatur [RemoteControl]",
@@ -403,6 +391,22 @@
                           "21_0": "69.8°F", "21_5": "70.7°F", "22_0": "71.6°F", "22_5": "72.5°F", "23_0": "73.4°F", "23_5": "74.3°F", "24_0": "75.2°F", "24_5": "76.1°F", "25_0": "77.0°F", "25_5": "77.9°F",
                           "26_0": "78.8°F", "26_5": "79.7°F", "27_0": "80.6°F", "27_5": "81.5°F", "28_0": "82.4°F", "28_5": "83.3°F", "29_0": "84.2°F", "29_5": "85.1°F", "30_0": "86.0°F",
                           "hi": "HIGH"}
+            },
+            "rccseatrearleft": {
+                "name": "RC (❄|☀): Sitz hinten links [RemoteControl]",
+                "state": { "off": "aus", "cooled1": "Kühlen Stufe I", "cooled2": "Kühlen Stufe II", "cooled3": "Kühlen Stufe III", "heated1": "Heizen Stufe I", "heated2": "Heizen Stufe II", "heated3": "Heizen Stufe III"}
+            },
+            "rccseatrearright": {
+                "name": "RC (❄|☀): Sitz hinten rechts [RemoteControl]",
+                "state": { "off": "aus", "cooled1": "Kühlen Stufe I", "cooled2": "Kühlen Stufe II", "cooled3": "Kühlen Stufe III", "heated1": "Heizen Stufe I", "heated2": "Heizen Stufe II", "heated3": "Heizen Stufe III"}
+            },
+            "rccseatfrontleft": {
+                "name": "RC (❄|☀): Sitz vorne links [RemoteControl]",
+                "state": { "off": "aus", "cooled1": "Kühlen Stufe I", "cooled2": "Kühlen Stufe II", "cooled3": "Kühlen Stufe III", "heated1": "Heizen Stufe I", "heated2": "Heizen Stufe II", "heated3": "Heizen Stufe III"}
+            },
+            "rccseatfrontright": {
+                "name": "RC (❄|☀): Sitz vorne rechts [RemoteControl]",
+                "state": { "off": "aus", "cooled1": "Kühlen Stufe I", "cooled2": "Kühlen Stufe II", "cooled3": "Kühlen Stufe III", "heated1": "Heizen Stufe I", "heated2": "Heizen Stufe II", "heated3": "Heizen Stufe III"}
             },
             "elvehtargetcharge": {
                 "name": "Ziel-Ladestand EV",

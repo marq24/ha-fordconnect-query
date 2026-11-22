@@ -70,7 +70,8 @@
             "reauth_not_possible": "Ingen gyldig region funnet\n\nDu må dessverre konfigurere integrasjonen på nytt",
             "no_filesystem_access": "Denne integrasjonen trenger tilgang til det lokale filsystemet i Home Assistant-installasjonen din for å kunne lagre en nøkkel til FordPass™/The Lincoln Way™-kontoen din.\n\nFor dette opprettes en undermappe i mappen '.storage/'. Det er ikke mulig akkurat nå – en intern test feilet. Du finner detaljer i Home Assistant-loggen din.\n\nKontroller at Home Assistant-installasjonen kjøres som riktig bruker med skrivetilgang til det lokale filsystemet.\n\nKjører du Home Assistant i en Docker-container, sørg for at containeren kjøres med riktig bruker og har tilgang til filsystemet.\n\nSjekk installasjonen og start oppsettet av integrasjonen på nytt når tilgangen til filsystemet er på plass.",
             "no_brand": "Ingen bilmerke (Ford eller Lincoln) ble registrert",
-            "oauth_error_final": "## Henting av det endelige OAuth-tokenet mislyktes\nNoe gikk galt under henting av det endelige tilgangstokenet fra Ford. Er du sikker på at opplysningene du har angitt som `client-id` og `secret` er riktige?\nSjekk også loggen i Home Assistant for flere feilmeldinger som kan hjelpe deg med å finne årsaken.\n\n#### Mulig årsak:\n{error_info}"
+            "oauth_error_final": "## Henting av det endelige OAuth-tokenet mislyktes\nNoe gikk galt under henting av det endelige tilgangstokenet fra Ford. Er du sikker på at opplysningene du har angitt som `client-id` og `secret` er riktige?\nSjekk også loggen i Home Assistant for flere feilmeldinger som kan hjelpe deg med å finne årsaken.\n\n#### Mulig årsak:\n{error_info}",
+            "user_rejected_authorize": "## Brukeren avviste autorisasjonen\nBrukeren avviste autorisasjonen for bruk av FordConnect Query-integrasjonen. Kontroller at du har oppgitt riktige påloggingsopplysninger, og prøv igjen.\n\n#### Mulig årsak:\n{error_info}"
         },
         "error": {
             "cannot_connect": "Kunne ikke koble til",
@@ -194,13 +195,7 @@
     "services": {
         "refresh_status": {
             "name": "Oppdater kjøretøyets status",
-            "description": "Ber bilen om de nyeste opplysningene (kan ta opptil 5 min før statusen er oppdatert).",
-            "fields": {
-                "vin": {
-                    "name": "VIN",
-                    "description": "Oppgi et VIN-nummer for å bare oppdatere det aktuelle kjøretøyet (uten VIN oppdateres alle tillagte kjøretøy)"
-                }
-            }
+            "description": "Ber bilen om de nyeste opplysningene (kan ta opptil 5 min før statusen er oppdatert)."
         },
         "clear_tokens": {
             "name": "Tøm token-cache",
@@ -319,6 +314,7 @@
             "elvehplug":                {"name": "Ladekontakt"},
             "elvehcharging":            {"name": "EV-ladestatus"},
             "elvehchargingpower":       {"name": "EV-ladeeffekt"},
+            "elvehrecuppower":          {"name": "EV-regenerativ"},
             "speed":                    {"name": "Hastighet"},
             "enginespeed":              {"name": "Turtall"},
             "gearleverposition":        {"name": "Girposisjon"},
@@ -328,6 +324,7 @@
             "engineoiltemp":            {"name": "Temperatur: motorolje"},
             "deepsleep":                {"name": "Dvalemodus"},
             "firmwareupginprogress":    {"name": "Programvareoppdatering pågår"},
+            "firmwareupgstatus":        {"name": "Programvareoppdatering Status"},
             "remotestartstatus":        {"name": "RC (❄|☀): Status fjernstart"},
             "zonelighting":             {"name": "Sonebelysning"},
             "messages":                 {"name": "Meldinger"},
@@ -337,12 +334,10 @@
             "metrics":                  {"name": "Målinger"},
             "states":                   {"name": "Tilstander"},
             "vehicles":                 {"name": "Kjøretøy"},
-
             "soc":                      {"name": "Batterinivå (EV)"},
             "evccstatus":               {"name": "EVCC-statuskode"},
             "seatbelt":                 {"name": "Sikkerhetsbeltestatus"},
             "deviceconnectivity":       {"name": "Tilkobling"},
-
             "yawrate":                  {"name": "Girhastighet"},
             "acceleration":             {"name": "Akselerasjon"},
             "brakepedalstatus":         {"name": "Status: bremsepedal"},

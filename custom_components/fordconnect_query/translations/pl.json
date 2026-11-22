@@ -112,7 +112,6 @@
             "token": {
                 "title": "Konfiguracja tokenu",
                 "description": "Konfiguracja tokenu wymaga drugiego okna przeglądarki (z włączonymi narzędziami deweloperskimi - F12), aby przechwycić końcowy token dostępu.\r\rTo dość nietypowa procedura jak na integrację Home Assistant, szczegóły znajdziesz w [przewodniku konfiguracji]({repo}/blob/main/doc/OBTAINING_TOKEN.md)\r\rWykonaj następujące kroki:\r1. Skopiuj poniższy URL lub kliknij poniższy link (musi zostać otwarty w nowej karcie/oknie): [Rozpocznij procedurę autoryzacji]({url})\r2. Otwórz przeglądarkę (z włączonymi narzędziami deweloperskimi) i wklej skopiowany URL w drugiej przeglądarce\r3. Wprowadź (ponownie) dane logowania FordPass™/The Lincoln Way™ i kliknij przycisk logowania\r4. Obserwuj kartę Network (Sieć), aż zobaczysz żądanie `?code=`\r5. Skopiuj pełny `Request-URL` tego żądania z narzędzi deweloperskich przeglądarki i wklej go poniżej w polu Token\r6. Kliknij OK, aby kontynuować\r\r> [!TIP]\r> JosephBlock stworzył osobne narzędzie, które wspiera proces pozyskiwania kodu tokenu dostępu, dzięki czemu narzędzia deweloperskie przeglądarki nie są potrzebne. Jeśli nie przeszkadza Ci instalacja małej aplikacji pomocniczej na komputerze, możesz pobrać to narzędzie stąd: [{github_root}/JosephBlock/fordapp-handler]({github_root}/JosephBlock/fordapp-handler).",
-
                 "data": {
                     "url": "URL: skopiuj go do przeglądarki",
                     "tokenstr": "Token Request-URL: po zakończeniu logowania w przeglądarce wklej pełny `Request-URL`"
@@ -180,12 +179,14 @@
                     "pressure_unit": "Jednostka ciśnienia",
                     "update_interval": "Interwał odpytywania Ford-API (sekundy)",
                     "scan_interval": "Interwał odpytywania Ford-API (sekundy)",
+                    "skip_data_existance_check": "Ignore data existence check",
                     "force_remote_climate_control": "Opcje zdalnej klimatyzacji (❄|☀) mają być zawsze dostępne",
                     "log_to_filesystem": "Zapisuj odpowiedzi API w lokalnym systemie plików HA"
                 },
                 "data_description": {
                     "update_interval": "Minimalny interwał aktualizacji to 30 sekund",
                     "scan_interval": "Minimalny interwał aktualizacji to 30 sekund",
+                    "skip_data_existance_check": "By default the integration only add entities (with few exceptions) if the underlying datasource can be found in the initially received data backend data (you can disable this data-consistency check).",
                     "force_remote_climate_control": "Jeśli włączysz tę opcję, ustawienie określone przez Forda zostanie zignorowane.",
                     "log_to_filesystem": "Ta opcja nie powinna być włączona przez dłuższy czas!\rPliki znajdziesz w: './storage/{integration_name}/data_dumps'"
                 },
@@ -196,13 +197,7 @@
     "services": {
         "refresh_status": {
             "name": "Odśwież status pojazdu",
-            "description": "Pobierz z samochodu najnowszy status (aktualizacja po uruchomieniu tej funkcji może potrwać do 5 minut!)",
-            "fields": {
-                "vin": {
-                    "name": "VIN",
-                    "description": "Podaj numer VIN, aby odświeżyć tylko wskazany pojazd (domyślnie odświeżane są wszystkie dodane pojazdy)"
-                }
-            }
+            "description": "Pobierz z samochodu najnowszy status (aktualizacja po uruchomieniu tej funkcji może potrwać do 5 minut!)"
         },
         "clear_tokens": {
             "name": "Wyczyść tokeny",
@@ -289,6 +284,7 @@
             "closewindows":         {"name": "Zamknij wszystkie okna"}
         },
         "device_tracker":   {"tracker": {"name": "Lokalizator pojazdu"}},
+        "image":            {"vehicleimage":  {"name":  "Vehicle Picture"}},
         "lock":             {"doorlock":{"name": "Drzwi"}},
         "switch": {
             "ignition":                 {"name": "RC (❄|☀): Start [RemoteControl]"},
@@ -310,6 +306,7 @@
         "sensor": {
             "odometer":                 {"name": "Przebieg"},
             "fuel":                     {"name": "Paliwo"},
+            "fuelrange":                {"name": "Fuel Range"},
             "battery":                  {"name": "Akumulator (12V)"},
             "oil":                      {"name": "Żywotność oleju"},
             "tirepressure":             {"name": "Ciśnienie w oponach"},
@@ -323,6 +320,7 @@
             "elvehplug":                {"name": "EV: wtyczka"},
             "elvehcharging":            {"name": "EV: stan ładowania"},
             "elvehchargingpower":       {"name": "EV: naładowano"},
+            "elvehrecuppower":          {"name": "EV Recuperating Power"},
             "speed":                    {"name": "Prędkość"},
             "enginespeed":              {"name": "Obroty"},
             "gearleverposition":        {"name": "Pozycja dźwigni zmiany biegów"},
@@ -332,6 +330,7 @@
             "engineoiltemp":            {"name": "Temperatura oleju silnikowego"},
             "deepsleep":                {"name": "Tryb uśpienia"},
             "firmwareupginprogress":    {"name": "Trwa aktualizacja oprogramowania"},
+            "firmwareupgstatus":        {"name": "Firmware Update Status"},
             "remotestartstatus":        {"name": "RC (❄|☀): Status zdalnego uruchomienia"},
             "zonelighting":             {"name": "Oświetlenie strefowe"},
             "messages":                 {"name": "Wiadomości"},
@@ -362,6 +361,10 @@
             "doorlock":                 {"name": "Stan zamków"},
 
             "departureschedules":       {"name": "Następny zaplanowany odjazd"},
+            "otaschedule":              {"name": "Next OTA Update Check"},
+            "lastfirmwareupdate":       {"name": "Last Firmware Update"},
+            "firmwareupdatehistory":    {"name": "Firmware Update History"},
+            "otareadiness":             {"name": "OTA Update Readiness"},
 
             "batteryvoltage":           {"name": "Napięcie akumulatora (12V)"},
             "batteryloadstatus":        {"name": "Stan obciążenia akumulatora (12V)"},
