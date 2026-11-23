@@ -21,7 +21,7 @@ CONF_LOG_TO_FILESYSTEM: Final = "log_to_filesystem"
 
 CONF_PRESSURE_UNIT: Final = "pressure_unit"
 DEFAULT_PRESSURE_UNIT: Final = "BAR"
-PRESSURE_UNITS: Final = ["PSI", "kPa", "BAR"]
+PRESSURE_UNITS: Final = ["PSI", "kPa", "BAR", "RAW"]
 
 WINDOW_POSITIONS: Final = {
     "CLOSED": {
@@ -38,6 +38,7 @@ WINDOW_POSITIONS: Final = {
 
 REMOTE_START_STATE_ACTIVE: Final      = "Active"
 REMOTE_START_STATE_INACTIVE: Final    = "Inactive"
+REMOTE_START_EXPIREDATE: Final = "expireDate"
 
 RCC_SEAT_MODE_HEAT_AND_COOL: Final = "HEAT_AND_COOL"
 RCC_SEAT_MODE_HEAT_ONLY: Final = "HEAT_ONLY"

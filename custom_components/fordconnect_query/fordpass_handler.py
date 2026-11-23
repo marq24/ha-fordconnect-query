@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from datetime import timedelta, datetime
 from numbers import Number
 from re import sub
@@ -21,11 +22,13 @@ from .const_shared import (
     XEVPLUGCHARGER_STATE_DISCONNECTED,
     XEVPLUGCHARGER_STATE_CONNECTED,
     XEVBATTERYCHARGEDISPLAY_STATE_IN_PROGRESS,
+    XEVBATTERYCHARGEDISPLAY_STATE_PAUSED,
     VEHICLE_LOCK_STATE_LOCKED,
     VEHICLE_LOCK_STATE_PARTLY,
     VEHICLE_LOCK_STATE_UNLOCKED,
     REMOTE_START_STATE_ACTIVE,
     REMOTE_START_STATE_INACTIVE,
+    REMOTE_START_EXPIREDATE,
     HONK_AND_FLASH,
     DAYS_MAP,
     OTA_DEPLOYMENT_STATE_MAP,
@@ -212,6 +215,13 @@ class FordpassDataHandler:
 
         return attrs
 
+    # FUEL RANGE (distance to empty) state
+    def get_fuel_range_state(data, prev_state=None):
+        fuel_range = FordpassDataHandler.get_value_for_metrics_key(data, "fuelRange")
+        if isinstance(fuel_range, Number):
+            return round(float(fuel_range))
+        return None
+
 
     # SOC state + attributes
     def get_soc_state(data, prev_state=None):
@@ -273,12 +283,21 @@ class FordpassDataHandler:
         elif units.pressure_unit == UnitOfPressure.BAR:
             digits = 2
 
+        def get_value_str(a_val:Number, units:UnitSystem, digits:int):
+            # INH2O is our "raw" format for pressure...
+            if units.pressure_unit == UnitOfPressure.INH2O:
+                return f"{a_val}"
+            return f"{round(units.pressure(a_val, UnitOfPressure.KPA), digits)} {units.pressure_unit}"
+
         if "tirePressure" in data_metrics:
             for a_tire in data_metrics["tirePressure"]:
                 a_val = a_tire.get("value", UNSUPPORTED)
                 if a_val is not None and a_val != UNSUPPORTED and isinstance(a_val, Number):
                     if "vehicleWheel" in a_tire:
-                        attrs[FordpassDataHandler.to_camel(a_tire["vehicleWheel"])] = f"{round(units.pressure(a_val, UnitOfPressure.KPA), digits)} {units.pressure_unit}"
+                        attrs[FordpassDataHandler.to_camel(a_tire["vehicleWheel"])] = get_value_str(a_val, units, digits)
+                        a_placecard_val = a_tire.get("wheelPlacardFront", a_tire.get("wheelPlacardRear", UNSUPPORTED))
+                        if a_placecard_val is not None and a_placecard_val != UNSUPPORTED and isinstance(a_placecard_val, Number):
+                            attrs[f"{FordpassDataHandler.to_camel(a_tire['vehicleWheel'])}_placecard_max"] = get_value_str(a_placecard_val, units, digits)
 
         if "tirePressureStatus" in data_metrics:
             for a_tire in data_metrics["tirePressureStatus"]:
@@ -799,24 +818,23 @@ class FordpassDataHandler:
     def get_cancel_pause_charge_switch_state(data, prev_state=None):
         # we will use a ha switch entity for this, so we need to return "ON" or "OFF"
         data_metrics = FordpassDataHandler.get_metrics(data)
-        val = data_metrics.get("xevPlugChargerStatus", {}).get("value", UNSUPPORTED)
+        val = str(data_metrics.get("xevPlugChargerStatus", {}).get("value", UNSUPPORTED)).upper()
         if val != UNSUPPORTED:
-            val = val.upper()
-            if val == XEVPLUGCHARGER_STATE_CHARGING or val == XEVPLUGCHARGER_STATE_CHARGINGAC:
+            if val in [XEVPLUGCHARGER_STATE_CHARGING, XEVPLUGCHARGER_STATE_CHARGINGAC]:
                 return "ON"
             elif val == XEVPLUGCHARGER_STATE_CONNECTED and "xevBatteryChargeDisplayStatus" in data_metrics:
-                secondary_val = data_metrics.get("xevBatteryChargeDisplayStatus", {}).get("value", UNSUPPORTED).upper()
+                secondary_val = str(data_metrics.get("xevBatteryChargeDisplayStatus", {}).get("value", UNSUPPORTED)).upper()
                 if secondary_val == XEVBATTERYCHARGEDISPLAY_STATE_IN_PROGRESS:
                     return "ON"
         return "OFF"
 
     async def on_off_cancel_pause_charge(data, vehicle, turn_on:bool) -> bool:
-            if turn_on:
-                return await vehicle.cancel_charge()
-            else:
-                return await vehicle.pause_charge()
+        if turn_on:
+            return await vehicle.cancel_charge()
+        else:
+            return await vehicle.pause_charge()
 
-    def _get_eleveh_charging_power_from_metrics(data_metrics):
+    def _get_eleveh_charging_power_from_metrics(data_metrics, plug_must_be_connected:bool):
         def parse_metric_int(key):
             """Extracts (float_value, datetime) or (0.0, None) if missing/invalid."""
             if key not in data_metrics:
@@ -830,16 +848,45 @@ class FordpassDataHandler:
                 dt = None
             return val, dt
 
+        def should_exit_on_status(plug_must_be_connected, data_metrics, key, valid_states):
+            if key not in data_metrics:
+                return False
+
+            state = str(data_metrics.get(key, {}).get("value", UNSUPPORTED)).upper()
+            if state == UNSUPPORTED:
+                return False
+
+            is_state_in_valid_states = state in valid_states
+            # If plug_must_be_connected is True, we want it IN the list (is_state_in_valid_states should be True)
+            # If plug_must_be_connected is False, we want it NOT IN the list (is_state_in_valid_states should be False)
+            # An inequality check covers both cases:
+            return plug_must_be_connected != is_state_in_valid_states
+
         # 1. Parse voltage
         volt, _ = parse_metric_int("xevBatteryChargerVoltageOutput")
         if not isinstance(volt, Number) or volt == 0:
             return 0 if "xevBatteryChargerVoltageOutput" in data_metrics else None
 
-        # 2. Parse charger and battery current metrics
+        # 2. Only count power while a charging session is in progress. Outside
+        #    a session the charger current keeps the stale value of the last
+        #    session (#264) and the battery current carries traction and regen
+        #    current while driving, which the timestamp rule below would pick
+        #    up as charging (#291).
+        # Check Plug Status
+        if should_exit_on_status(plug_must_be_connected, data_metrics, "xevPlugChargerStatus",
+                                 [XEVPLUGCHARGER_STATE_CONNECTED, XEVPLUGCHARGER_STATE_CHARGING, XEVPLUGCHARGER_STATE_CHARGINGAC]):
+            return 0
+
+        # Check Battery Charge Display Status
+        if should_exit_on_status(plug_must_be_connected, data_metrics, "xevBatteryChargeDisplayStatus",
+                                 [XEVBATTERYCHARGEDISPLAY_STATE_IN_PROGRESS, XEVBATTERYCHARGEDISPLAY_STATE_PAUSED]):
+            return 0
+
+        # 3. Parse charger and battery current metrics
         ch_amps, ch_dt = parse_metric_int("xevBatteryChargerCurrentOutput")
         batt_amps, batt_dt = parse_metric_int("xevBatteryIoCurrent")
 
-        # 3. Determine amperage based on the newer timestamps
+        # 4. Determine amperage based on the newer timestamps
         if ch_dt and batt_dt:
             amps_to_use_for_calc = ch_amps if ch_dt > batt_dt else abs(batt_amps)
         elif ch_dt:
@@ -849,11 +896,11 @@ class FordpassDataHandler:
         else:
             amps_to_use_for_calc = 0
 
-        # 4. Calculate power (kW)
+        # 5. Calculate power (kW)
         if isinstance(amps_to_use_for_calc, Number) and amps_to_use_for_calc != 0:
             return round((volt * amps_to_use_for_calc) / 1000, 2)
 
-        return 0
+        return None
 
     def get_elveh_charging_attrs(data, units:UnitSystem):
         data_metrics = FordpassDataHandler.get_metrics(data)
@@ -881,7 +928,7 @@ class FordpassDataHandler:
                 attrs[attr_name] = transform_fn(value, units)
 
         # handle the self-calculated custom metrics stuff
-        charging_kw = FordpassDataHandler._get_eleveh_charging_power_from_metrics(data_metrics)
+        charging_kw = FordpassDataHandler._get_eleveh_charging_power_from_metrics(data_metrics, plug_must_be_connected=True)
         if charging_kw is not None:
             attrs["chargingkW"] = charging_kw
 
@@ -929,9 +976,19 @@ class FordpassDataHandler:
 
     # ELVEH_CHARGING_power state
     def get_elveh_charging_power_state(data, prev_state=None):
-        charging_kw = FordpassDataHandler._get_eleveh_charging_power_from_metrics(data_metrics = FordpassDataHandler.get_metrics(data))
+        charging_kw = FordpassDataHandler._get_eleveh_charging_power_from_metrics(
+            data_metrics = FordpassDataHandler.get_metrics(data),
+            plug_must_be_connected = True)
         if charging_kw is not None:
             return charging_kw
+        return None
+
+    def get_elveh_recuperate_power_state(data, prev_state=None):
+        recuperate_kw = FordpassDataHandler._get_eleveh_charging_power_from_metrics(
+            data_metrics = FordpassDataHandler.get_metrics(data),
+            plug_must_be_connected = False)
+        if recuperate_kw is not None:
+            return recuperate_kw
         return None
 
     # ELVEH_PLUG attributes
@@ -959,7 +1016,7 @@ class FordpassDataHandler:
                 return "A"
             elif val == XEVPLUGCHARGER_STATE_CONNECTED:
                 if "xevBatteryChargeDisplayStatus" in data_metrics:
-                    secondary_val = data_metrics.get("xevBatteryChargeDisplayStatus", {}).get("value", UNSUPPORTED).upper()
+                    secondary_val = str(data_metrics.get("xevBatteryChargeDisplayStatus", {}).get("value", UNSUPPORTED)).upper()
                     if secondary_val == XEVBATTERYCHARGEDISPLAY_STATE_IN_PROGRESS:
                         return "C"
                 return "B"
@@ -1023,10 +1080,23 @@ class FordpassDataHandler:
         return await vehicle.set_zone_lighting(target_value, current_value)
 
 
+    # internal helper, which checks additional for the expireDate of the remoteStartCountdownTimer metric
+    # that the code set internally when processing websocket messages...
+    def _get_remote_start_countdown_with_expire_date_check(data) -> int:
+        remote_start_countdown_obj = FordpassDataHandler.get_metrics(data).get("remoteStartCountdownTimer", {})
+        val = remote_start_countdown_obj.get("value", -1)
+        if val > 0:
+            if REMOTE_START_EXPIREDATE in remote_start_countdown_obj and remote_start_countdown_obj[REMOTE_START_EXPIREDATE] is not None:
+                #_LOGGER.debug(f"RemoteStartCountdownTimer value check: {val} -> expireDate: {datetime.fromtimestamp(remote_start_countdown_obj[REMOTE_START_EXPIREDATE]).strftime("%H:%M:%S")}")
+                expire_date = float(remote_start_countdown_obj[REMOTE_START_EXPIREDATE])
+                if time.time() >= expire_date:
+                    val = 0
+        return val
+
     # REMOTE_START state + on_off
     def get_remote_start_state(data, prev_state=None):
-        val = FordpassDataHandler.get_value_for_metrics_key(data, "remoteStartCountdownTimer", 0)
-        return "ON" if val > 0 else "OFF"
+        val = FordpassDataHandler._get_remote_start_countdown_with_expire_date_check(data) > 0
+        return "ON" if val else "OFF"
 
     # this was 'IGNITION' switch - we keep the key name for compatibility...
     async def on_off_remote_start(data, vehicle, turn_on:bool) -> bool:
@@ -1038,8 +1108,8 @@ class FordpassDataHandler:
 
     # REMOTE_START_STATUS state + attributes
     def get_remote_start_status_state(data, prev_state=None):
-        val = FordpassDataHandler.get_value_for_metrics_key(data, "remoteStartCountdownTimer", 0)
-        return REMOTE_START_STATE_ACTIVE if val > 0 else REMOTE_START_STATE_INACTIVE
+        val = FordpassDataHandler._get_remote_start_countdown_with_expire_date_check(data) > 0
+        return REMOTE_START_STATE_ACTIVE if val else REMOTE_START_STATE_INACTIVE
 
     def get_remote_start_status_attrs(data, units:UnitSystem):
         return {"countdown": FordpassDataHandler.get_value_for_metrics_key(data, "remoteStartCountdownTimer", 0)}
@@ -1193,6 +1263,15 @@ class FordpassDataHandler:
             return {"ambientTemp": FordpassDataHandler.localize_temperature(ambient_temp, units)}
         return None
 
+    # PARKING_BRAKE attribute
+    def get_parking_brake_attrs(data, units:UnitSystem):
+        parking_brake_data = FordpassDataHandler.get_metrics_dict(data, "parkingBrakeStatus")
+        if parking_brake_data is None or not isinstance(parking_brake_data, dict):
+            return None
+        attrs = {}
+        if "parkingBrakeType" in parking_brake_data:
+            attrs["type"] = parking_brake_data.get("parkingBrakeType", UNSUPPORTED)
+        return attrs or None
 
     # CABIN_TEMP state + attributes (from trip data)
     def get_cabin_temperature_state(data, prev_state=None):
@@ -1769,6 +1848,15 @@ class FordpassDataHandler:
             "weeklySchedule": weekly_schedule,
         }
 
+    def get_vehicle_image_url(data, prev_state=None):
+        veh_obj = FordpassDataHandler.get_vehicle(data)
+        if veh_obj:
+            return veh_obj.get("profile",{}).get("vehicleImage", None)
+
+    #######################################
+    ## END OF STATES/ATTRIBUES functions ##
+    #######################################
+
     # the last successfully installed ECU/firmware package, sourced from events.configurationUpdateEvent.
     # depending on push type this has been observed both as a top-level key of "events" and nested one
     # level deeper under "events.customEvents" - we check both rather than trust either shape blindly.
@@ -2115,11 +2203,17 @@ class FordpassDataHandler:
         await coordinator.force_async_update_now()
 
     async def request_update_and_reload(coordinator, vehicle):
-        await vehicle.request_update()
-        # when we send a UPDATE request to the vehicle, THEN all new data is already
-        # provided via the command_handler! - no need to FORCE a manual update
-        # afterward!
-        #await coordinator.force_async_update_now()
+        # this is the BUTTON implementation
+        force_val = False
+        coord_data = coordinator.data
+        if coord_data:
+            ignition_val = FordpassDataHandler.get_value_for_metrics_key(coord_data, "ignitionStatus", "off")
+            if ignition_val:
+                if str(ignition_val).lower() == "on":
+                    _LOGGER.debug(f"request_update_and_reload(): ignoring possible ratelimit, since 'ignitionStatus' is '{ignition_val}'")
+                    force_val = True
+
+        await vehicle.request_update(force=force_val)
 
     async def lock_vehicle(coordinator, vehicle):
         await vehicle.lock()
