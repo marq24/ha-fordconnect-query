@@ -633,6 +633,16 @@ class FordPassEntity(CustomFriendlyNameEntity):
         """Initialize the entity."""
         super().__init__(coordinator)
 
+        # handling nasty stuff with the unrecorded attributes - we need to combine the default unrecorded attributes
+        # of the entity class with the excluded attributes of the tag... and stuff this back into the mangled name
+        # of the parent class (Entity) - cause this is where the 'unrecorded_attributes' are checked!
+        if a_tag.excluded_attrs is not None and len(a_tag.excluded_attrs) > 0:
+            self._unrecorded_attributes  = a_tag.excluded_attrs
+            component_defaults = getattr(self, "_entity_component_unrecorded_attributes", frozenset())
+            updated_combined = component_defaults | self._unrecorded_attributes
+            # Since Entity is the parent class, its mangled name is always "_Entity__combined_unrecorded_attributes"
+            setattr(self, "_Entity__combined_unrecorded_attributes", updated_combined)
+
         # ok setting the internal translation key attr (so we can make use of the translation key in the entity)
         self._attr_translation_key = a_tag.key.lower()
         if description is not None:

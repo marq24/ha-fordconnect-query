@@ -1,4 +1,5 @@
 """All vehicle sensors from the accessible by the API"""
+import _threading_local
 import logging
 from dataclasses import replace
 from datetime import datetime
@@ -31,12 +32,16 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
             _LOGGER.debug(f"{coordinator.vli}SENSOR '{a_entity_description.tag}' not supported for this engine-type/vehicle")
             continue
 
-        sensor = FordPassSensor(coordinator, a_entity_description)
         # calling the state reading function to check if the sensor should be added (if there is any data)
+        if not a_entity_description.tag.state_fn:
+            _LOGGER.debug(f"{coordinator.vli}SENSOR '{a_entity_description.tag}' skipping cause no state function defined")
+            continue
+
         value = a_entity_description.tag.state_fn(coordinator.data, None)
         if value is not None and ((isinstance(value, (str, Number)) and str(value) != UNSUPPORTED) or
                                   (isinstance(value, (dict, list)) and len(value) != 0) or
                                   (isinstance(value, datetime) and value) ):
+            sensor = FordPassSensor(coordinator, a_entity_description)
             sensors.append(sensor)
         else:
             _LOGGER.debug(f"{coordinator.vli}SENSOR '{a_entity_description.tag}' skipping cause no data available: type: {type(value).__name__} - value:'{value}'")
