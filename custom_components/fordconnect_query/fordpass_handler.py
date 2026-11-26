@@ -829,10 +829,10 @@ class FordpassDataHandler:
         return "OFF"
 
     async def on_off_cancel_pause_charge(data, vehicle, turn_on:bool) -> bool:
-        if turn_on:
-            return await vehicle.cancel_charge()
-        else:
-            return await vehicle.pause_charge()
+            if turn_on:
+                return await vehicle.cancel_charge()
+            else:
+                return await vehicle.pause_charge()
 
     def _get_eleveh_charging_power_from_metrics(data_metrics, plug_must_be_connected:bool):
         def parse_metric_int(key):
@@ -874,12 +874,12 @@ class FordpassDataHandler:
         #    up as charging (#291).
         # Check Plug Status
         if should_exit_on_status(plug_must_be_connected, data_metrics, "xevPlugChargerStatus",
-                                 [XEVPLUGCHARGER_STATE_CONNECTED, XEVPLUGCHARGER_STATE_CHARGING, XEVPLUGCHARGER_STATE_CHARGINGAC]):
+                [XEVPLUGCHARGER_STATE_CONNECTED, XEVPLUGCHARGER_STATE_CHARGING, XEVPLUGCHARGER_STATE_CHARGINGAC]):
             return 0
 
         # Check Battery Charge Display Status
         if should_exit_on_status(plug_must_be_connected, data_metrics, "xevBatteryChargeDisplayStatus",
-                                 [XEVBATTERYCHARGEDISPLAY_STATE_IN_PROGRESS, XEVBATTERYCHARGEDISPLAY_STATE_PAUSED]):
+                [XEVBATTERYCHARGEDISPLAY_STATE_IN_PROGRESS, XEVBATTERYCHARGEDISPLAY_STATE_PAUSED]):
             return 0
 
         # 3. Parse charger and battery current metrics
@@ -1937,9 +1937,9 @@ class FordpassDataHandler:
                 day['dayOfWeek'].lower(): active
                 for day in departure_schedules_list
                 if (active := [ {
-                    'scheduleId': s['scheduleId'],
-                    'timeOfDay': s['timeOfDay']
-                }
+                        'scheduleId': s['scheduleId'],
+                        'timeOfDay': s['timeOfDay']
+                    }
                     for s in day['schedules']
                     if s['scheduleStatus'] == 'ON'
                 ])
@@ -2089,21 +2089,29 @@ class FordpassDataHandler:
             else:
                 # DAY_LIST mode...
                 # Rule: Find a slot with status OFF/ON (that can be toggled)
-                target_slot = next((s for s in schedules if s["scheduleStatus"] == ("OFF" if enable_schedule else "ON")), None)
+                target_slots = [s for s in schedules if s["scheduleStatus"] == ("OFF" if enable_schedule else "ON")]
 
-                if target_slot is None:
+                if len(target_slots) == 0:
                     # Rule 3: Day already has two ON/OFF slots -> ignore and log
                     _LOGGER.info(f"update_departure_schedule(): Day {day_name} already has two {"ON" if enable_schedule else "OFF"} slots. Skipping.")
                     continue
 
-                # 4. Apply changes to the OFF slot
-                target_slot.update({
-                    "scheduleStatus": "ON" if enable_schedule else "OFF",
-                    "preconditionTemperature": precon_temperature.upper(),
-                    "timeOfDay": {"hours": hour, "minutes": rounded_minute}
-                })
+                # when we ENABLE/ADD a new schedule, and if for the current DAY, there are two slots available (OFF)
+                # then we still only want to UPDATE a single `OFF` schedule in any other case we would add two times
+                # the same schedule!
+                if enable_schedule and len(target_slots) > 1:
+                    target_slots = target_slots[:1]  # Only take the first available OFF slot
+
+                # 4. Apply changes to the slots
+                for target_slot in target_slots:
+                    target_slot.update({
+                        "scheduleStatus": "ON" if enable_schedule else "OFF",
+                        "preconditionTemperature": precon_temperature.upper(),
+                        "timeOfDay": {"hours": hour, "minutes": rounded_minute}
+                    })
+                    _LOGGER.debug(f"update_departure_schedule(): Updated slot on {day_name} (ID: {target_slot['scheduleId']}) to {"ON" if enable_schedule else "OFF"}.")
+
                 any_changes = True
-                _LOGGER.debug(f"update_departure_schedule(): Updated slot on {day_name} (ID: {target_slot['scheduleId']}) to {"ON" if enable_schedule else "OFF"}.")
 
         # checking if we have manipulated the departure_schedules_list
         if not any_changes:
