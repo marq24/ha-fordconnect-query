@@ -14,7 +14,7 @@ from . import FordPassEntity, FordConQDataCoordinator
 from .const import DOMAIN
 from .const_shared import COORDINATOR_KEY
 from .const_tags import SENSORS, ExtSensorEntityDescription, Tag
-from .fordpass_handler import UNSUPPORTED
+from .fordpass_handler import MY_UNSUPPORTED
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
             continue
 
         value = a_entity_description.tag.state_fn(coordinator.data, None)
-        if value is not None and ((isinstance(value, (str, Number)) and str(value) != UNSUPPORTED) or
+        if value is not None and ((isinstance(value, (str, Number)) and str(value) != MY_UNSUPPORTED) or
                                   (isinstance(value, (dict, list)) and len(value) != 0) or
                                   (isinstance(value, datetime) and value) ):
             sensor = FordPassSensor(coordinator, a_entity_description)

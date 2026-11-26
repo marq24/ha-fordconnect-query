@@ -21,10 +21,14 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.icon import icon_for_battery_level
 from homeassistant.helpers.storage import STORAGE_DIR
-from homeassistant.helpers.typing import UNDEFINED
 from homeassistant.helpers.update_coordinator import UpdateFailed, DataUpdateCoordinator
 from homeassistant.loader import async_get_integration
 from homeassistant.util.unit_system import UnitSystem
+try:
+    from homeassistant.helpers.typing import Undefined as HA_UNDEFINED  # type: ignore[attr-defined]
+except ImportError:
+    from homeassistant.helpers.typing import UNDEFINED as HA_UNDEFINED
+
 from .const import (
     DOMAIN,
     CONF_VIN,
@@ -49,7 +53,7 @@ from .const_shared import (
 from .const_tags import Tag, FUEL_OR_PEV_ONLY_TAGS, EV_ONLY_TAGS, RCC_TAGS
 from .entity import CustomFriendlyNameEntity
 from .fordpass_handler import (
-    UNSUPPORTED,
+    MY_UNSUPPORTED,
     ROOT_METRICS,
     ROOT_MESSAGES,
     ROOT_VEHICLES,
@@ -385,11 +389,11 @@ class FordConQDataCoordinator(DataUpdateCoordinator):
                 _LOGGER.debug(f"{self.vli}NumberOfLightingZones is: {self._number_of_lighting_zones}")
 
         if self.data is not None:
-            self._supports_ALARM = Tag.ALARM.get_state(self.data) != UNSUPPORTED
+            self._supports_ALARM = Tag.ALARM.get_state(self.data) != MY_UNSUPPORTED
 
             # other self._supports_* attribues will be checked in 'metrics' data...
             if ROOT_METRICS in self.data:
-                self._supports_AUTO_UPDATES = Tag.AUTO_UPDATES.get_state(self.data) != UNSUPPORTED
+                self._supports_AUTO_UPDATES = Tag.AUTO_UPDATES.get_state(self.data) != MY_UNSUPPORTED
                 _LOGGER.debug(f"{self.vli}AutoUpdates supported: {self._supports_AUTO_UPDATES}")
         else:
             _LOGGER.warning(f"{self.vli}DATA is NONE!!! - {self.data}")
@@ -706,7 +710,7 @@ class FordPassEntity(CustomFriendlyNameEntity):
         If has_entity_name is True, this returns device.name + self.name
         """
         name = self.name
-        if name is UNDEFINED:
+        if name is HA_UNDEFINED:
             name = None
 
         if not self.has_entity_name or not (device_entry := self.device_entry):
