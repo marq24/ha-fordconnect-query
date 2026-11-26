@@ -21,7 +21,7 @@ from homeassistant.helpers.config_entry_oauth2_flow import (
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.icon import icon_for_battery_level
 from homeassistant.helpers.storage import STORAGE_DIR
-from homeassistant.helpers.typing import UNDEFINED, UndefinedType
+from homeassistant.helpers.typing import UNDEFINED
 from homeassistant.helpers.update_coordinator import UpdateFailed, DataUpdateCoordinator
 from homeassistant.loader import async_get_integration
 from homeassistant.util.unit_system import UnitSystem
@@ -658,7 +658,7 @@ class FordPassEntity(CustomFriendlyNameEntity):
         self.entity_id = f"{entity_type}.fcq_{self.coordinator._vin.lower()}_{a_tag.key}".lower()
         self._tag = a_tag
 
-    def _name_internal(self, device_class_name: str | None, platform_translations: dict[str, Any], ) -> str | UndefinedType | None:
+    def _name_internal(self, device_class_name: str | None, platform_translations: dict[str, Any], ) -> str | None:
         tmp = super()._name_internal(device_class_name, platform_translations)
         if self._attr_name_addon is not None:
             return f"{self._attr_name_addon} {tmp}"
