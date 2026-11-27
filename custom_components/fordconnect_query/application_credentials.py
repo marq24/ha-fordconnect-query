@@ -17,9 +17,8 @@ from homeassistant.components.application_credentials import (
 )
 from homeassistant.exceptions import OAuth2TokenRequestReauthError
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.config_entry_oauth2_flow import (
-    LocalOAuth2Implementation,
-)
+from homeassistant.helpers.config_entry_oauth2_flow import LocalOAuth2Implementation
+
 from .const import (
     DOMAIN,
     FORD_AUTHORIZE_URL,
@@ -64,7 +63,7 @@ class FordConQOAuth2Implementation(LocalOAuth2Implementation):
         }
         try:
             response = await self._token_request(request_data)
-            _LOGGER.info(f"async_resolve_external_data(): got _token_request response: {response}")
+            _LOGGER.info(f"async_resolve_external_data(): got a _token_request response")
             return response
         except ClientError as err:
             _LOGGER.error(f"async_resolve_external_data(): failed to get token: {err}")
